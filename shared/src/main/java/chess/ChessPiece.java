@@ -11,6 +11,16 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
+abstract class MoveCalculator {
+
+    Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+
+    }
+}
+class BishopMoveCalculator extends MoveCalculator {
+
+}
+
 public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
@@ -70,28 +80,55 @@ public class ChessPiece {
     public Collection<ChessMove> checkLaser(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, String direction) {
         int distance = 1;
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        while(row + distance <= 8 && row - distance > 0 && column + distance <= 8 && column - distance > 0) {
-            ChessPosition checkPos = switch (direction) {
-                case "ne" -> new ChessPosition(row + distance, column + distance);
-                case "se" -> new ChessPosition(row - distance, column + distance);
-                case "sw" -> new ChessPosition(row - distance, column - distance);
-                case "nw" -> new ChessPosition(row + distance, column - distance);
-                case "n" -> new ChessPosition(row + distance, column);
-                case "e" -> new ChessPosition(row, column + distance);
-                case "s" -> new ChessPosition(row-distance, column);
-                case "w" -> new ChessPosition(row, column-distance);
-                default -> new ChessPosition(1, 1);
-            };
+        ChessPosition checkPos;
+
+        while(true) {
+            switch (direction) {
+                case "ne":
+                    checkPos = new ChessPosition(row + distance, column + distance);
+                    break;
+                case "se":
+                    checkPos = new ChessPosition(row - distance, column + distance);
+                    break;
+                case "sw":
+                    checkPos = new ChessPosition(row - distance, column - distance);
+                    break;
+                case "nw":
+                    checkPos = new ChessPosition(row + distance, column - distance);
+                    break;
+                case "n":
+                    checkPos = new ChessPosition(row + distance, column);
+                    break;
+                case "e":
+                    checkPos = new ChessPosition(row, column + distance);
+                    break;
+                case "s":
+                    checkPos = new ChessPosition(row - distance, column);
+                    break;
+                case "w":
+                    checkPos = new ChessPosition(row, column - distance);
+                    break;
+                default:
+                    checkPos = new ChessPosition(1, 1);
+                    break;
+            }
+            if(checkPos.getColumn() > 8 || checkPos.getColumn() < 1 || checkPos.getRow() > 8 || checkPos.getRow() < 1)
+                break; // ensures that the checked position is within the bounds of the board
 
             ChessMove potentialMove = new ChessMove(position, checkPos, null);
-            if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
-                //if the selected square is empty or has a piece from the opposite team, add the move to the move list
+            if(board.getPiece(checkPos) == null){
+                //if the selected square is empty, add the move to the move list and continue counting
                 moves.add(potentialMove);
                 distance += 1;
+            } else if (board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                //if it has an opposite team piece, add the move and stop counting
+                moves.add(potentialMove);
+                break;
             }
-            else
+            else //if there is a piece of your own team, don't add the move, and stop counting
                 break;
         }
+
         return moves;
     }
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
@@ -100,6 +137,7 @@ public class ChessPiece {
 
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
+
         switch(thisPiece.getPieceType()) {
             case BISHOP:
                 //checks a laser in each direction and adds the available spaces in each direction to moves
