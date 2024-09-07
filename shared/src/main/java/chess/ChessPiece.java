@@ -23,43 +23,25 @@ abstract class MoveCalculator {
 //    Collection<ChessMove> calculateMoves() {
 //
 //    }
-    Collection<ChessMove> checkLaser(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, String direction) {
+    Collection<ChessMove> checkLaser(int row, int column, int range, ChessBoard board, ChessPosition position, ChessPiece thisPiece, String direction) {
         int distance = 1;
-        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        Collection<ChessMove> moves = new ArrayList<>();
         ChessPosition checkPos;
-
+        int counter = range;
         while(true) {
-            switch (direction) {
-                case "ne":
-                    checkPos = new ChessPosition(row + distance, column + distance);
-                    break;
-                case "se":
-                    checkPos = new ChessPosition(row - distance, column + distance);
-                    break;
-                case "sw":
-                    checkPos = new ChessPosition(row - distance, column - distance);
-                    break;
-                case "nw":
-                    checkPos = new ChessPosition(row + distance, column - distance);
-                    break;
-                case "n":
-                    checkPos = new ChessPosition(row + distance, column);
-                    break;
-                case "e":
-                    checkPos = new ChessPosition(row, column + distance);
-                    break;
-                case "s":
-                    checkPos = new ChessPosition(row - distance, column);
-                    break;
-                case "w":
-                    checkPos = new ChessPosition(row, column - distance);
-                    break;
-                default:
-                    checkPos = new ChessPosition(1, 1);
-                    break;
-            }
-            if(checkPos.getColumn() > 8 || checkPos.getColumn() < 1 || checkPos.getRow() > 8 || checkPos.getRow() < 1)
-                break; // ensures that the checked position is within the bounds of the board
+            checkPos = switch (direction) {
+                case "ne" -> new ChessPosition(row + distance, column + distance);
+                case "se" -> new ChessPosition(row - distance, column + distance);
+                case "sw" -> new ChessPosition(row - distance, column - distance);
+                case "nw" -> new ChessPosition(row + distance, column - distance);
+                case "n" -> new ChessPosition(row + distance, column);
+                case "e" -> new ChessPosition(row, column + distance);
+                case "s" -> new ChessPosition(row - distance, column);
+                case "w" -> new ChessPosition(row, column - distance);
+                default -> new ChessPosition(1, 1);
+            };
+            if(checkPos.getColumn() > 8 || checkPos.getColumn() < 1 || checkPos.getRow() > 8 || checkPos.getRow() < 1 || counter == 0)
+                break; // ensures that the checked position is within the bounds of the board and that it is within the range of the piece (either 1 or infinity)
 
             ChessMove potentialMove = new ChessMove(position, checkPos, null);
             if(board.getPiece(checkPos) == null){
@@ -73,44 +55,25 @@ abstract class MoveCalculator {
             }
             else //if there is a piece of your own team, don't add the move, and stop counting
                 break;
+            counter--;
         }
 
         return moves;
     }
-    Collection<ChessMove> checkAdjacent(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, String direction) {
+    Collection<ChessMove> checkSpace(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, int rowDiff, int colDiff) {
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
-        ChessPosition checkPos;
-        switch (direction) {
-            case "ne":
-                checkPos = new ChessPosition(row + 1, column + 1);
-                break;
-            case "se":
-                checkPos = new ChessPosition(row - 1, column + 1);
-                break;
-            case "sw":
-                checkPos = new ChessPosition(row - 1, column - 1);
-                break;
-            case "nw":
-                checkPos = new ChessPosition(row + 1, column - 1);
-                break;
-            case "n":
-                checkPos = new ChessPosition(row + 1, column);
-                break;
-            case "e":
-                checkPos = new ChessPosition(row, column + 1);
-                break;
-            case "s":
-                checkPos = new ChessPosition(row - 1, column);
-                break;
-            case "w":
-                checkPos = new ChessPosition(row, column - 1);
-                break;
-            default:
-                checkPos = new ChessPosition(1, 1);
-                break;
+        ChessPosition checkPos = new ChessPosition(row + rowDiff, column + colDiff);
+        ChessMove potentialMove = new ChessMove(position, checkPos, null);
+
+        if(checkPos.getColumn() <= 8 || checkPos.getColumn() >= 1 || checkPos.getRow() <= 8 || checkPos.getRow() >= 1) {
+            if(thisPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                if(colDiff != 0 && board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()) //capture diagonals
+                    moves.add(potentialMove);
+                else if(colDiff == 0 && board.getPiece(checkPos) == null) //move forward
+                    moves.add(potentialMove);
+            }
         }
-        if(checkPos.getColumn() > 8 || checkPos.getColumn() < 1 || checkPos.getRow() > 8 || checkPos.getRow() < 1)
-            break; // ensures that the checked position is within the bounds of the board
+        return moves;
     }
 }
 
@@ -125,14 +88,14 @@ class BishopMoveCalculator extends MoveCalculator {
 
     Collection<ChessMove> calculateMoves() {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        Collection<ChessMove> moves = new HashSet<>();
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"ne"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"se"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"sw"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"nw"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"ne"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"se"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"sw"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"nw"));
         return moves;
     }
 }
@@ -148,17 +111,18 @@ class RookMoveCalculator extends MoveCalculator {
 
     Collection<ChessMove> calculateMoves() {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        Collection<ChessMove> moves = new HashSet<>();
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"n"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"e"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"s"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"w"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"n"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"e"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"s"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"w"));
         return moves;
     }
 }
+
 class QueenMoveCalculator extends MoveCalculator {
     private final ChessBoard board;
     private final ChessPosition myPosition;
@@ -169,27 +133,78 @@ class QueenMoveCalculator extends MoveCalculator {
     }
     Collection<ChessMove> calculateMoves() {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        Collection<ChessMove> moves = new HashSet<>();
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"n"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"ne"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"e"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"se"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"s"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"sw"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"w"));
-        moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"nw"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"n"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"ne"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"e"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"se"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"s"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"sw"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"w"));
+        moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece,"nw"));
         return moves;
     }
 }
-//class KingMoveCalculator extends MoveCalculator {
-//
-//}
-//class PawnMoveCalculator extends MoveCalculator {
-//
-//}
+
+class KingMoveCalculator extends MoveCalculator {
+    ChessBoard board;
+    ChessPosition myPosition;
+    public KingMoveCalculator(ChessBoard board, ChessPosition myPosition){
+        super(board, myPosition);
+        this.board = board;
+        this.myPosition = myPosition;
+    }
+
+    Collection<ChessMove> calculateMoves() {
+        ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
+        Collection<ChessMove> moves = new HashSet<>();
+        int myRow = myPosition.getRow();
+        int myCol = myPosition.getColumn();
+        //checks a single square in each direction and adds the available spaces in each direction to moves
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"n"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"ne"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"e"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"se"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"s"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"sw"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"w"));
+        moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece,"nw"));
+        return moves;
+    }
+
+}
+
+class PawnMoveCalculator extends MoveCalculator {
+    ChessBoard board;
+    ChessPosition myPosition;
+    public PawnMoveCalculator(ChessBoard board, ChessPosition myPosition){
+        super(board, myPosition);
+        this.board = board;
+        this.myPosition = myPosition;
+    }
+
+    Collection<ChessMove> calculateMoves() {
+        ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
+        Collection<ChessMove> moves = new HashSet<>();
+        int myRow = myPosition.getRow();
+        int myCol = myPosition.getColumn();
+        int steps;
+        if(myRow == 2 || myRow == 7) //ensure that pawns can move 2 spaces if they are on their starter row
+            steps = 2;               //a white pawn will trigger this at row 7, but it only has one space left anyway
+        else steps = 1;
+
+        //white pawns
+        moves.addAll(checkLaser(myRow, myCol, steps, board, myPosition, thisPiece,"n"));
+        //black pawns
+        moves.addAll(checkLaser(myRow, myCol, steps, board, myPosition, thisPiece,"s"));
+
+        return moves;
+    }
+}
+
 //class KnightMoveCalculator extends MoveCalculator {
 //
 //}
@@ -266,6 +281,10 @@ public class ChessPiece {
             case QUEEN:
                 QueenMoveCalculator queenCalc = new QueenMoveCalculator(board, myPosition);
                 moves = queenCalc.calculateMoves();
+                break;
+            case KING:
+                KingMoveCalculator kingCalc = new KingMoveCalculator(board, myPosition);
+                moves = kingCalc.calculateMoves();
                 break;
         }
         return moves;
