@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -49,7 +50,7 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
@@ -66,66 +67,46 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+    public Collection<ChessMove> checkLaser(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, String direction) {
+        int distance = 1;
+        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        while(row + distance <= 8 && row - distance > 0 && column + distance <= 8 && column - distance > 0) {
+            ChessPosition checkPos = switch (direction) {
+                case "ne" -> new ChessPosition(row + distance, column + distance);
+                case "se" -> new ChessPosition(row - distance, column + distance);
+                case "sw" -> new ChessPosition(row - distance, column - distance);
+                case "nw" -> new ChessPosition(row + distance, column - distance);
+                case "n" -> new ChessPosition(row + distance, column);
+                case "e" -> new ChessPosition(row, column + distance);
+                case "s" -> new ChessPosition(row-distance, column);
+                case "w" -> new ChessPosition(row, column-distance);
+                default -> new ChessPosition(1, 1);
+            };
+
+            ChessMove potentialMove = new ChessMove(position, checkPos, null);
+            if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                //if the selected square is empty or has a piece from the opposite team, add the move to the move list
+                moves.add(potentialMove);
+                distance += 1;
+            }
+            else
+                break;
+        }
+        return moves;
+    }
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
-        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
 
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         switch(thisPiece.getPieceType()) {
             case BISHOP:
-                int distance = 1;
-                // create 4 diagonal "lasers" that stop when they hit another piece or the edge
-                // up and right
-                while(myRow + distance <= 8 && myCol + distance <= 8) {
-                    ChessPosition checkPos = new ChessPosition(myRow + distance, myCol + distance);
-                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
-                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
-                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
-                        moves.add(potentialMove);
-                        distance += 1;
-                    }
-                    else
-                        break;
-                }
-                //down and right
-                distance = 1;
-                while(myRow + distance <= 8 && myCol - distance > 0) {
-                    ChessPosition checkPos = new ChessPosition(myRow + distance, myCol - distance);
-                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
-                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
-                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
-                        moves.add(potentialMove);
-                        distance += 1;
-                    }
-                    else
-                        break;
-                }
-                //down and left
-                distance = 1;
-                while(myRow - distance > 0 && myCol - distance > 0) {
-                    ChessPosition checkPos = new ChessPosition(myRow - distance, myCol - distance);
-                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
-                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
-                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
-                        moves.add(potentialMove);
-                        distance += 1;
-                    }
-                    else
-                        break;
-                }
-                distance = 1;
-                while(myRow - distance > 0 && myCol + distance <= 8) {
-                    ChessPosition checkPos = new ChessPosition(myRow - distance, myCol + distance);
-                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
-                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
-                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
-                        moves.add(potentialMove);
-                        distance += 1;
-                    }
-                    else
-                        break;
-                }
+                //checks a laser in each direction and adds the available spaces in each direction to moves
+                moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"ne"));
+                moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"se"));
+                moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"sw"));
+                moves.addAll(checkLaser(myRow, myCol, board, myPosition, thisPiece,"nw"));
         }
         return moves;
     }
