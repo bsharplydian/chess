@@ -54,7 +54,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
-        ArrayList<ChessMove> moves = new ArrayList<ChessMove>();
+        Collection<ChessMove> moves = new ArrayList<ChessMove>();
 
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
@@ -62,10 +62,50 @@ public class ChessPiece {
             case BISHOP:
                 int distance = 1;
                 // create 4 diagonal "lasers" that stop when they hit another piece or the edge
+                // up and right
                 while(myRow + distance <= 8 && myCol + distance <= 8) {
                     ChessPosition checkPos = new ChessPosition(myRow + distance, myCol + distance);
                     ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
-                    if(board.getPiece(checkPos) == null){
+                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
+                        moves.add(potentialMove);
+                        distance += 1;
+                    }
+                    else
+                        break;
+                }
+                //down and right
+                distance = 1;
+                while(myRow + distance <= 8 && myCol - distance > 0) {
+                    ChessPosition checkPos = new ChessPosition(myRow + distance, myCol - distance);
+                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
+                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
+                        moves.add(potentialMove);
+                        distance += 1;
+                    }
+                    else
+                        break;
+                }
+                //down and left
+                distance = 1;
+                while(myRow - distance > 0 && myCol - distance > 0) {
+                    ChessPosition checkPos = new ChessPosition(myRow - distance, myCol - distance);
+                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
+                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
+                        moves.add(potentialMove);
+                        distance += 1;
+                    }
+                    else
+                        break;
+                }
+                distance = 1;
+                while(myRow - distance > 0 && myCol + distance <= 8) {
+                    ChessPosition checkPos = new ChessPosition(myRow - distance, myCol + distance);
+                    ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
+                    if(board.getPiece(checkPos) == null || board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()){
+                        //if the selected square is empty or has a piece from the opposite team, add the move to the move list
                         moves.add(potentialMove);
                         distance += 1;
                     }
