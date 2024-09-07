@@ -56,13 +56,13 @@ public class ChessPiece {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
         ArrayList<ChessMove> moves = new ArrayList<ChessMove>();
 
-        int myRow = myPosition.getRow()-1;
-        int myCol = myPosition.getColumn()-1;
+        int myRow = myPosition.getRow();
+        int myCol = myPosition.getColumn();
         switch(thisPiece.getPieceType()) {
             case BISHOP:
                 int distance = 1;
                 // create 4 diagonal "lasers" that stop when they hit another piece or the edge
-                while(myRow + distance < 8 && myCol + distance < 8) {
+                while(myRow + distance <= 8 && myCol + distance <= 8) {
                     ChessPosition checkPos = new ChessPosition(myRow + distance, myCol + distance);
                     ChessMove potentialMove = new ChessMove(myPosition, checkPos, getPieceType());
                     if(board.getPiece(checkPos) == null){

@@ -19,7 +19,7 @@ public class ChessPosition {
     */
     public String toString() {
         String letter = "";
-        switch(getRow()){
+        switch(getColumn()){
             case 0:
                 letter = "NEVER APPEARS";
                 break;
@@ -48,7 +48,7 @@ public class ChessPosition {
                 letter = "h";
                 break;
         }
-        return letter + getColumn();
+        return letter + getRow();
     }
     /**
      * @return which row this position is in
