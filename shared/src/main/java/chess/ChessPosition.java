@@ -18,7 +18,37 @@ public class ChessPosition {
     /* override toString
     */
     public String toString() {
-        return Integer.toString(getRow()) + getColumn();
+        String letter = "";
+        switch(getRow()){
+            case 0:
+                letter = "NEVER APPEARS";
+                break;
+            case 1:
+                letter = "a";
+                break;
+            case 2:
+                letter = "b";
+                break;
+            case 3:
+                letter = "c";
+                break;
+            case 4:
+                letter = "d";
+                break;
+            case 5:
+                letter = "e";
+                break;
+            case 6:
+                letter = "f";
+                break;
+            case 7:
+                letter = "g";
+                break;
+            case 8:
+                letter = "h";
+                break;
+        }
+        return letter + getColumn();
     }
     /**
      * @return which row this position is in
