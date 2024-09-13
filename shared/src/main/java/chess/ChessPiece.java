@@ -89,6 +89,10 @@ public class ChessPiece {
                 KingMoveCalculator kingCalc = new KingMoveCalculator(board, myPosition);
                 moves = kingCalc.calculateMoves();
                 break;
+            case PAWN:
+                PawnMoveCalculator pawnCalc = new PawnMoveCalculator(board, myPosition);
+                moves = pawnCalc.calculateMoves();
+                break;
         }
         return moves;
     }
@@ -148,17 +152,35 @@ abstract class MoveCalculator {
 
         return moves;
     }
+    Collection<ChessMove> getAllPromotions(ChessPosition position, ChessPosition checkPos) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.QUEEN));
+        moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.ROOK));
+        moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.BISHOP));
+        moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.KNIGHT));
+        return moves;
+    }
     Collection<ChessMove> checkSpace(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, int rowDiff, int colDiff) {
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
         ChessPosition checkPos = new ChessPosition(row + rowDiff, column + colDiff);
+        ChessPiece targetPiece = board.getPiece(checkPos);
         ChessMove potentialMove = new ChessMove(position, checkPos, null);
 
         if(checkPos.getColumn() <= 8 || checkPos.getColumn() >= 1 || checkPos.getRow() <= 8 || checkPos.getRow() >= 1) {
-            if(thisPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                if(colDiff != 0 && board.getPiece(checkPos).getTeamColor() != thisPiece.getTeamColor()) //capture diagonals
-                    moves.add(potentialMove);
-                else if(colDiff == 0 && board.getPiece(checkPos) == null) //move forward
-                    moves.add(potentialMove);
+            if(thisPiece.getPieceType() == ChessPiece.PieceType.PAWN) { //pawn special rules
+                if(targetPiece != null && colDiff != 0 && targetPiece.getTeamColor() != thisPiece.getTeamColor()) { //capture diagonals
+                    if(checkPos.getRow() == 8 || checkPos.getRow() == 1) //add promotions if moving to last rank
+                        moves.addAll(getAllPromotions(position, checkPos));
+                    else //use default (null) promotion if moving to any other rank
+                        moves.add(potentialMove);
+                }
+                else if(colDiff == 0 && targetPiece == null) //move forward
+                    if(checkPos.getRow() == 8 || checkPos.getRow() == 1)
+                        moves.addAll(getAllPromotions(position, checkPos));
+                    else
+                        moves.add(potentialMove);
+            } else if(targetPiece == null || targetPiece.getTeamColor() != thisPiece.getTeamColor()) {
+                moves.add(potentialMove);
             }
         }
         return moves;
@@ -258,28 +280,35 @@ class PawnMoveCalculator extends MoveCalculator {
         this.myPosition = myPosition;
     }
 
+    Collection<ChessMove> choosePawnDirection(int myRow, int myCol, ChessBoard board, ChessPosition myPosition, ChessPiece thisPiece, int direction){
+        Collection<ChessMove> moves = new ArrayList<>();
+        //directly ahead
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, direction, 0));
+        boolean firstSpacePossible = !moves.isEmpty();
+        //if in starting position, check second space ahead (and make sure that it can move to the first space)
+        if(((direction == 1 && myRow == 2) || (direction == -1 && myRow == 7)) && firstSpacePossible)
+            moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, 2*direction, 0));
+
+        //check diagonals for capture
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, direction, 1));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, direction, -1));
+
+        return moves;
+    }
     Collection<ChessMove> calculateMoves() {
         ChessPiece thisPiece = board.getPiece(myPosition); //stores current piece object in a variable
         Collection<ChessMove> moves = new HashSet<>();
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
-        int steps;
+        int direction = 1;
 
         if(board.getPiece(myPosition).getTeamColor() == chess.ChessGame.TeamColor.WHITE) { //white pawns
-            if(myRow == 2)
-                steps = 2;
-            else steps = 1;
-            moves.addAll(checkLaser(myRow, myCol, steps, board, myPosition, thisPiece, 0));
-            //modify checkLaser so pawns can't capture forward
-            //check diagonals for capture
+            direction = 1;
 
         } else if (board.getPiece(myPosition).getTeamColor() == chess.ChessGame.TeamColor.BLACK) { //black pawns
-            if(myRow == 7)
-                steps = 2;
-            else steps = 1;
-            moves.addAll(checkLaser(myRow, myCol, steps, board, myPosition, thisPiece,4));
+            direction = -1;
         }
-
+        moves.addAll(choosePawnDirection(myRow, myCol, board, myPosition, thisPiece, direction));
 
         return moves;
     }
