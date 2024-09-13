@@ -93,6 +93,10 @@ public class ChessPiece {
                 PawnMoveCalculator pawnCalc = new PawnMoveCalculator(board, myPosition);
                 moves = pawnCalc.calculateMoves();
                 break;
+            case KNIGHT:
+                KnightMoveCalculator knightCalc = new KnightMoveCalculator(board, myPosition);
+                moves = knightCalc.calculateMoves();
+                break;
         }
         return moves;
     }
@@ -152,7 +156,7 @@ abstract class MoveCalculator {
 
         return moves;
     }
-    Collection<ChessMove> getAllPromotions(ChessPosition position, ChessPosition checkPos) {
+    Collection<ChessMove> getPromotionMoves(ChessPosition position, ChessPosition checkPos) {
         Collection<ChessMove> moves = new ArrayList<>();
         moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.QUEEN));
         moves.add(new ChessMove(position, checkPos, ChessPiece.PieceType.ROOK));
@@ -163,26 +167,34 @@ abstract class MoveCalculator {
     Collection<ChessMove> checkSpace(int row, int column, ChessBoard board, ChessPosition position, ChessPiece thisPiece, int rowDiff, int colDiff) {
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
         ChessPosition checkPos = new ChessPosition(row + rowDiff, column + colDiff);
-        ChessPiece targetPiece = board.getPiece(checkPos);
         ChessMove potentialMove = new ChessMove(position, checkPos, null);
+        ChessPiece targetPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        if(checkPos.getColumn() <= 8 && checkPos.getColumn() >= 1 && checkPos.getRow() <= 8 && checkPos.getRow() >= 1) {
+            targetPiece = board.getPiece(checkPos);
 
-        if(checkPos.getColumn() <= 8 || checkPos.getColumn() >= 1 || checkPos.getRow() <= 8 || checkPos.getRow() >= 1) {
-            if(thisPiece.getPieceType() == ChessPiece.PieceType.PAWN) { //pawn special rules
-                if(targetPiece != null && colDiff != 0 && targetPiece.getTeamColor() != thisPiece.getTeamColor()) { //capture diagonals
-                    if(checkPos.getRow() == 8 || checkPos.getRow() == 1) //add promotions if moving to last rank
-                        moves.addAll(getAllPromotions(position, checkPos));
+            if (thisPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                //pawn special rules
+
+                if (targetPiece != null && colDiff != 0 && targetPiece.getTeamColor() != thisPiece.getTeamColor()) {
+                    //capture diagonals
+
+                    if (checkPos.getRow() == 8 || checkPos.getRow() == 1) //add promotions if moving to last rank
+                        moves.addAll(getPromotionMoves(position, checkPos));
                     else //use default (null) promotion if moving to any other rank
                         moves.add(potentialMove);
-                }
-                else if(colDiff == 0 && targetPiece == null) //move forward
-                    if(checkPos.getRow() == 8 || checkPos.getRow() == 1)
-                        moves.addAll(getAllPromotions(position, checkPos));
+                } else if (colDiff == 0 && targetPiece == null)
+                    //move forward
+
+                    if (checkPos.getRow() == 8 || checkPos.getRow() == 1)
+                        moves.addAll(getPromotionMoves(position, checkPos));
                     else
                         moves.add(potentialMove);
-            } else if(targetPiece == null || targetPiece.getTeamColor() != thisPiece.getTeamColor()) {
+            } else if (targetPiece == null || targetPiece.getTeamColor() != thisPiece.getTeamColor()) {
+                //rules for knights
                 moves.add(potentialMove);
             }
         }
+
         return moves;
     }
 }
@@ -314,6 +326,30 @@ class PawnMoveCalculator extends MoveCalculator {
     }
 }
 
-//class KnightMoveCalculator extends MoveCalculator {
-//
-//}
+class KnightMoveCalculator extends MoveCalculator {
+    private final ChessBoard board;
+    private final ChessPosition myPosition;
+
+    public KnightMoveCalculator(ChessBoard board, ChessPosition myPosition){
+        super(board, myPosition);
+
+        this.board = board;
+        this.myPosition = myPosition;
+    }
+
+    Collection<ChessMove> calculateMoves() {
+        ChessPiece thisPiece = board.getPiece(myPosition);
+        Collection<ChessMove> moves = new ArrayList<>();
+        int myRow = myPosition.getRow();
+        int myCol = myPosition.getColumn();
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, 1, 2));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, -1, 2));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, 1, -2));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, -1, -2));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, 2, 1));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, -2, 1));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, 2, -1));
+        moves.addAll(checkSpace(myRow, myCol, board, myPosition, thisPiece, -2, -1));
+        return moves;
+    }
+}
