@@ -2,6 +2,8 @@ package chess;
 
 import java.util.Arrays;
 import java.util.Objects;
+import chess.ChessPiece.PieceType;
+import chess.ChessGame.TeamColor;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -41,8 +43,34 @@ public class ChessBoard {
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
+    private void setTeamPieces(TeamColor color) {
+        int rank = 0;
+        if(color == TeamColor.BLACK)
+            rank = 7;
+        squares[rank][0] = new ChessPiece(color, PieceType.ROOK);
+        squares[rank][1] = new ChessPiece(color, PieceType.KNIGHT);
+        squares[rank][2] = new ChessPiece(color, PieceType.BISHOP);
+        squares[rank][3] = new ChessPiece(color, PieceType.QUEEN);
+        squares[rank][4] = new ChessPiece(color, PieceType.KING);
+        squares[rank][5] = new ChessPiece(color, PieceType.BISHOP);
+        squares[rank][6] = new ChessPiece(color, PieceType.KNIGHT);
+        squares[rank][7] = new ChessPiece(color, PieceType.ROOK);
+
+        //front rank
+        rank = 1;
+        if(color == TeamColor.BLACK)
+            rank = 6;
+        for(int i = 0; i < 8; i++)
+            squares[rank][i] = new ChessPiece(color, PieceType.PAWN);
+    }
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        var white = ChessGame.TeamColor.WHITE;
+        var black = ChessGame.TeamColor.BLACK;
+
+        setTeamPieces(white);
+        setTeamPieces(black);
+
+
     }
 
     @Override
