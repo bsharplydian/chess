@@ -26,7 +26,7 @@ public class ChessMove {
      */
     @Override
     public String toString() {
-        return String.format("%s:%s promotes to %s",getStartPosition(), getEndPosition(), getPromotionPiece());
+        return String.format("%s:%s %s",getStartPosition(), getEndPosition(), getPromotionPiece());
     }
 
     /**
