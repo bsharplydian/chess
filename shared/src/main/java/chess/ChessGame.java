@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -12,7 +13,7 @@ public class ChessGame {
     TeamColor turn = TeamColor.WHITE;
     ChessBoard board = new ChessBoard();
     public ChessGame() {
-        board.resetBoard(); //CHANGE THIS PROBABLY
+
     }
 
     /**
@@ -63,6 +64,18 @@ public class ChessGame {
     //boolean willShootFoot() {
         // takes as input a potential chessMove, then determines whether it will or won't leave the king in check
     //}
+    public Collection<ChessMove> getAllMoves(TeamColor teamColor) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++) {
+                ChessPosition checkPos = new ChessPosition(i, j);
+                if(board.getPiece(checkPos).getTeamColor() == teamColor) {
+                    moves.addAll(validMoves(checkPos));
+                }
+            }
+        }
+        return moves;
+    }
     /**
      * Makes a move in a chess game
      *
@@ -131,7 +144,9 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(isInCheck(teamColor))
+            return false;
+
         //1. ensure that isInCheck is false
         //2. check every piece on your team, and if there are no legal moves, return true.
     }
