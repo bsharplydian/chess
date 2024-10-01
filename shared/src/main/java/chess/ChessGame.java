@@ -10,8 +10,9 @@ import java.util.Collection;
  */
 public class ChessGame {
     TeamColor turn = TeamColor.WHITE;
+    ChessBoard board = new ChessBoard();
     public ChessGame() {
-
+        board.resetBoard(); //CHANGE THIS PROBABLY
     }
 
     /**
@@ -46,9 +47,22 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        //0. ensure that the selected piece is on the current team
+        //1. call pieceMoves on the start position
+        //2. remove any move that would put (or leave) the current team's king in check
+            //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
+                //then see if there is a king of your color in the opposite direction
+            //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
+        //3. return the resulting collection
 
+
+        //revealed checks: top priority, if you move your king will die
+        //ignored checks: second priority, if you move TO THE WRONG SPOT your king will die
     }
-
+    //helper function:
+    //boolean willShootFoot() {
+        // takes as input a potential chessMove, then determines whether it will or won't leave the king in check
+    //}
     /**
      * Makes a move in a chess game
      *
@@ -57,6 +71,14 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         throw new RuntimeException("Not implemented");
+
+        //takes a move, ensures that it is valid, then executes it
+
+        //1. call validMoves on the start position
+        //2. if the resulting list of moves contains the given move:
+        //3. remove the piece from the start position
+        //4. replace any piece at the end position with the piece that was at the start position
+        //5. check if the piece is now threatening the king or has revealed a threat to the king
     }
 
     /**
@@ -67,6 +89,26 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        //1. check every piece on the opposing team
+        //2. as soon as you reach a move that ends on the king's square, return true
+        //no no no there's gotta be a better way
+
+        //revised version:
+        //return boolean black_check or white_check; these values will be updated when a piece makes its move
+
+        // what if we store a boolean for each team
+        // logic goes in a separate function:
+        // if you make a move, check your own next moves and those of any rook, bishop, or queen on your team that was attacking your position
+            //this should account for both direct and revealed checks
+            //find any of them: check in the (appropriate) opposite direction for a king of the other color
+            //2 functions: revealDiagonals and revealUprights
+
+        //no no no no there's an even easier way
+        //1. start at the king's space
+        //2. check cardinals for rooks and queens
+        //3. check diagonals for bishops and queens
+        //4. check two corners in correct direction for pawns
+        //5. check 8 possible knight spaces
     }
 
     /**
@@ -77,6 +119,8 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        //1. check if isInCheck is true
+        //2. check every piece on your team, and if there are no legal moves, return true
     }
 
     /**
@@ -88,6 +132,8 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        //1. ensure that isInCheck is false
+        //2. check every piece on your team, and if there are no legal moves, return true.
     }
 
     /**
@@ -96,7 +142,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
@@ -105,6 +151,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return this.board;
     }
 }
