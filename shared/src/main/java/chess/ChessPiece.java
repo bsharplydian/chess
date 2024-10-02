@@ -136,7 +136,7 @@ abstract class MoveCalculator {
                 case 6 -> new ChessPosition(row, column - distance);
                 default -> new ChessPosition(1, 1);
             };
-            if(checkPos.getColumn() > 8 || checkPos.getColumn() < 1 || checkPos.getRow() > 8 || checkPos.getRow() < 1 || counter == 0)
+            if(!checkPos.isInBounds() || counter == 0)
                 break; // ensures that the checked position is within the bounds of the board and that it is within the range of the piece (either 1 or infinity)
 
             ChessMove potentialMove = new ChessMove(position, checkPos, null);

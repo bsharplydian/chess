@@ -74,6 +74,38 @@ public class ChessGame {
     //boolean willShootFoot() {
         // takes as input a potential chessMove, then determines whether it will or won't leave the king in check
     //}
+    boolean checkLaser(ChessPosition startPosition, int addRow, int addCol) {
+        int distance = 1;
+        int myRow = startPosition.getRow();
+        int myCol = startPosition.getColumn();
+        ChessPiece piece = board.getPiece(startPosition);
+
+        while(true) {
+            ChessPosition checkPos = new ChessPosition(myRow+addRow*distance, myCol+addCol*distance);
+            ChessPiece.PieceType threatType = board.getPiece(checkPos).getPieceType();
+            if(!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() == piece.getTeamColor()) //found an edge or piece of your own team
+                return false;
+            if(Math.abs(addRow) == Math.abs(addCol)){ // diagonal
+                if(threatType == ChessPiece.PieceType.BISHOP || threatType == ChessPiece.PieceType.QUEEN)
+                    return true;
+            } else { // cardinal
+                if(threatType == ChessPiece.PieceType.ROOK || threatType == ChessPiece.PieceType.QUEEN)
+                    return true;
+            }
+            distance++;
+
+        }
+    }
+    boolean cardinalThreat(ChessPosition startPosition) {
+
+        return false;
+    }
+    boolean diagonalThreat(ChessPosition startPosition) {
+        return false;
+    }
+    boolean pinned(ChessPosition startPosition, ChessPosition threatPosition){
+        return false;
+    }
     public Collection<ChessMove> getAllMoves(TeamColor teamColor) {
         Collection<ChessMove> moves = new ArrayList<>();
         for(int i = 0; i < 8; i++){
