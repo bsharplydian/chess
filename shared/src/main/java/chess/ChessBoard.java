@@ -81,6 +81,8 @@ public class ChessBoard {
     public void movePiece(ChessMove move) {
         //doesn't think about the move at all, just takes a piece and puts it in a destination, replacing whatever is there
         ChessPiece myPiece = getPiece(move.getStartPosition());
+        if(move.getPromotionPiece() != null)
+            myPiece.setPieceType(move.getPromotionPiece());
         this.addPiece(move.getEndPosition(), myPiece);
         this.addPiece(move.getStartPosition(), null);
     }

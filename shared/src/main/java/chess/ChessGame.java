@@ -199,6 +199,7 @@ public class ChessGame {
 
         return checkSpace(kingRow + pawnThreatDirection, kingCol + 1, teamColor, ChessPiece.PieceType.PAWN) ||
                 checkSpace(kingRow + pawnThreatDirection, kingCol - 1, teamColor, ChessPiece.PieceType.PAWN) ||
+
                 checkSpace(kingRow + 2, kingCol + 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
                 checkSpace(kingRow + 2, kingCol - 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
                 checkSpace(kingRow - 2, kingCol + 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
@@ -206,7 +207,16 @@ public class ChessGame {
                 checkSpace(kingRow + 1, kingCol + 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
                 checkSpace(kingRow + 1, kingCol - 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
                 checkSpace(kingRow - 1, kingCol + 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
-                checkSpace(kingRow - 1, kingCol - 2, teamColor, ChessPiece.PieceType.KNIGHT);
+                checkSpace(kingRow - 1, kingCol - 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
+
+                checkSpace(kingRow - 1, kingCol + 1, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow, kingCol + 1, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow + 1, kingCol + 1, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow - 1, kingCol, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow +1, kingCol, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow - 1, kingCol - 1, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow, kingCol - 1, teamColor, ChessPiece.PieceType.KING) ||
+                checkSpace(kingRow + 1, kingCol - 1, teamColor, ChessPiece.PieceType.KING);
 
     }
     public boolean isInCheck(TeamColor teamColor) {
