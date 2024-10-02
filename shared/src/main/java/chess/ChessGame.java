@@ -13,7 +13,7 @@ public class ChessGame {
     TeamColor turn = TeamColor.WHITE;
     ChessBoard board = new ChessBoard();
     public ChessGame() {
-
+        board.resetBoard();
     }
 
     /**
@@ -48,9 +48,18 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        //0. ensure that the selected piece is on the current team
-        //1. call pieceMoves on the start position
+        ChessPiece piece = board.getPiece(startPosition);
+        Collection<ChessMove> moves = new ArrayList<>();
+        if(piece == null) return null;
+        if(piece.getTeamColor() != turn)
+            return moves; //0. ensure that the selected piece is on the current team
+
+        moves = piece.pieceMoves(board, startPosition); //1. call pieceMoves on the start position
+
+
         //2. remove any move that would put (or leave) the current team's king in check
+
+
             //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
                 //then see if there is a king of your color in the opposite direction
             //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
@@ -59,6 +68,7 @@ public class ChessGame {
 
         //revealed checks: top priority, if you move your king will die
         //ignored checks: second priority, if you move TO THE WRONG SPOT your king will die
+        return moves;
     }
     //helper function:
     //boolean willShootFoot() {
@@ -146,7 +156,7 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         if(isInCheck(teamColor))
             return false;
-
+        return getAllMoves(teamColor).isEmpty();
         //1. ensure that isInCheck is false
         //2. check every piece on your team, and if there are no legal moves, return true.
     }
