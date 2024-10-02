@@ -63,7 +63,7 @@ public class ChessGame {
             //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
                 //then see if there is a king of your color in the opposite direction
             //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
-        ChessGame.TeamColor color = piece.getTeamColor();
+        TeamColor color = piece.getTeamColor();
         for(var move : moves) {
 
             ChessBoard storageBoard = new ChessBoard();
@@ -84,11 +84,9 @@ public class ChessGame {
         //ignored checks: second priority, if you move TO THE WRONG SPOT your king will die
         return moves;
     }
-    //helper function:
-    //boolean willShootFoot() {
-        // takes as input a potential chessMove, then determines whether it will or won't leave the king in check
-    //}
+
     boolean checkLaser(ChessPosition startPosition, int addRow, int addCol) {
+        //returns true if there is a bishop, rook or queen threatening your position from the given direction
         int distance = 1;
         int myRow = startPosition.getRow();
         int myCol = startPosition.getColumn();
@@ -96,9 +94,11 @@ public class ChessGame {
 
         while(true) {
             ChessPosition checkPos = new ChessPosition(myRow+addRow*distance, myCol+addCol*distance);
-            if (!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() == piece.getTeamColor()) //found an edge or piece of your own team
+            if (!checkPos.isInBounds()) //found an edge or piece of your own team
                 return false;
             if(board.getPiece(checkPos) != null) {   //there is in fact a piece there
+                if(board.getPiece(checkPos).getTeamColor() == piece.getTeamColor())
+                    return false;
                 ChessPiece.PieceType threatType = board.getPiece(checkPos).getPieceType();
                 if (Math.abs(addRow) == Math.abs(addCol)) { // diagonal
                     return threatType == ChessPiece.PieceType.BISHOP || threatType == ChessPiece.PieceType.QUEEN;
@@ -110,44 +110,32 @@ public class ChessGame {
 
         }
     }
-    boolean checkForKing(ChessPosition startPosition, int addRow, int addCol) {
-        int distance = 1;
-        int myRow = startPosition.getRow();
-        int myCol = startPosition.getColumn();
-        ChessPiece piece = board.getPiece(startPosition);
 
-        while(true) {
-            ChessPosition checkPos = new ChessPosition(myRow + addRow * distance, myCol + addCol * distance);
-            if (!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() != piece.getTeamColor()) //found an edge or piece of your own team
-                return false;
-            if (board.getPiece(checkPos) != null) {
-                ChessPiece.PieceType otherType = board.getPiece(checkPos).getPieceType();
-                return otherType == ChessPiece.PieceType.KING;
-            }
-            distance++;
+    boolean cardinalThreat(ChessPosition startPosition) {
+        if(checkLaser(startPosition, 0, 1) ||
+            checkLaser(startPosition, 0, -1) ||
+            checkLaser(startPosition, 1, 0) ||
+            checkLaser(startPosition, -1, 0)) {
+            return true;
+        } else {
+            return false;
         }
     }
-    boolean cardinalThreat(ChessPosition startPosition) {
-        if(checkLaser(startPosition, 0, 1))
-            return checkForKing(startPosition, 0, -1);
-        if(checkLaser(startPosition, 0, -1))
-            return checkForKing(startPosition, 0, 1);
-        if(checkLaser(startPosition, 1, 0))
-            return checkForKing(startPosition, -1, 0);
-        if(checkLaser(startPosition, -1, 0))
-            return checkForKing(startPosition, 1, 0);
-        return false;
-    }
     boolean diagonalThreat(ChessPosition startPosition) {
-        return false;
+        if(checkLaser(startPosition, 1, 1) ||
+                checkLaser(startPosition, 1, -1) ||
+                checkLaser(startPosition, -1, 1) ||
+                checkLaser(startPosition, -1, -1)) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    boolean pinned(ChessPosition startPosition, ChessPosition threatPosition){
-        return false;
-    }
+
     public Collection<ChessMove> getAllMoves(TeamColor teamColor) {
         Collection<ChessMove> moves = new ArrayList<>();
-        for(int i = 0; i < 8; i++){
-            for(int j = 0; j < 8; j++) {
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++) {
                 ChessPosition checkPos = new ChessPosition(i, j);
                 if(board.getPiece(checkPos).getTeamColor() == teamColor) {
                     moves.addAll(validMoves(checkPos));
@@ -163,8 +151,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
-
+        Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
+        if(legalMoves == null || legalMoves.isEmpty())
+            throw new InvalidMoveException();
+        if(legalMoves.contains(move))
+            board.movePiece(move);
+        else throw new InvalidMoveException();
         //takes a move, ensures that it is valid, then executes it
 
         //1. call validMoves on the start position
@@ -180,28 +172,56 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+    private boolean checkSpace(int row, int col, TeamColor teamColor, ChessPiece.PieceType type) {
+        ChessPosition checkPos = new ChessPosition(row, col);
+        if(!checkPos.isInBounds() || board.getPiece(checkPos) == null)
+            return false;
+
+        return board.getPiece(checkPos).getTeamColor() != teamColor && board.getPiece(checkPos).getPieceType() == type;
+    }
+    private boolean pawnKnightThreat(ChessPosition kingPos, TeamColor teamColor) {
+        int kingRow = kingPos.getRow();
+        int kingCol = kingPos.getColumn();
+        int pawnThreatDirection = switch(teamColor) { //pawns will threaten from different sides
+            case WHITE -> 1;
+            case BLACK -> -1;
+        };
+
+
+        return checkSpace(kingRow + pawnThreatDirection, kingCol + 1, teamColor, ChessPiece.PieceType.PAWN) ||
+                checkSpace(kingRow + pawnThreatDirection, kingCol - 1, teamColor, ChessPiece.PieceType.PAWN) ||
+                checkSpace(kingRow + 2, kingCol + 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow + 2, kingCol - 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow - 2, kingCol + 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow - 2, kingCol - 1, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow + 1, kingCol + 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow + 1, kingCol - 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow - 1, kingCol + 2, teamColor, ChessPiece.PieceType.KNIGHT) ||
+                checkSpace(kingRow - 1, kingCol - 2, teamColor, ChessPiece.PieceType.KNIGHT);
+
+    }
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
-        //1. check every piece on the opposing team
-        //2. as soon as you reach a move that ends on the king's square, return true
-        //no no no there's gotta be a better way
 
-        //revised version:
-        //return boolean black_check or white_check; these values will be updated when a piece makes its move
+        ChessPosition kingPos = findKing(teamColor);
 
-        // what if we store a boolean for each team
-        // logic goes in a separate function:
-        // if you make a move, check your own next moves and those of any rook, bishop, or queen on your team that was attacking your position
-            //this should account for both direct and revealed checks
-            //find any of them: check in the (appropriate) opposite direction for a king of the other color
-            //2 functions: revealDiagonals and revealUprights
-
-        //no no no no there's an even easier way
-        //1. start at the king's space
-        //2. check cardinals for rooks and queens
-        //3. check diagonals for bishops and queens
-        //4. check two corners in correct direction for pawns
-        //5. check 8 possible knight spaces
+        if(kingPos == null) return false;
+        else {
+            return cardinalThreat(kingPos) || diagonalThreat(kingPos) || pawnKnightThreat(kingPos, teamColor);
+        }
+    }
+    private ChessPosition findKing(TeamColor color) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition checkPos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(checkPos);
+                if(board.getPiece(checkPos) == null)
+                    return null;
+                if((piece.getPieceType() == ChessPiece.PieceType.KING) && piece.getTeamColor() == color) {
+                    return checkPos;
+                }
+            }
+        }
+        return null;
     }
 
     /**
