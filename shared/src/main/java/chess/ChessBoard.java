@@ -38,6 +38,9 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
     }
+    public void  setPiece(ChessPosition position, ChessPiece piece) {
+        squares[position.getRow()-1][position.getColumn()-1] = piece;
+    }
     public ChessPiece[][] getSquares() {
         return squares;
     }
@@ -77,7 +80,11 @@ public class ChessBoard {
 
 
     }
-
+    public void movePiece(ChessMove move) {
+        ChessPiece myPiece = getPiece(move.getStartPosition());
+        setPiece(move.getEndPosition(), myPiece);
+        setPiece(move.getStartPosition(), null);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

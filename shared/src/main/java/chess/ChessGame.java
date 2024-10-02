@@ -66,7 +66,7 @@ public class ChessGame {
         for(var move : moves) {
             ChessBoard hypotheticalBoard = new ChessBoard();
             hypotheticalBoard.setSquares(board.getSquares());
-
+            board.getPiece(move.getStartPosition());
         }
         //2 revised. remove any move that would put (or leave) the current team's king in check
             //a. make a copy of the chessboard and do the move
