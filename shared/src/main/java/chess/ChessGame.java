@@ -67,7 +67,14 @@ public class ChessGame {
         for(var move : moves) {
 
             ChessBoard storageBoard = new ChessBoard();
-            storageBoard.setSquares(board.getSquares());
+
+            ChessPiece[][] boardDeepCopy = new ChessPiece[8][8];
+            ChessPiece[][] squares = board.getSquares();
+            for(int i = 0; i < 8; i++)
+                boardDeepCopy[i] = squares[i].clone();
+
+
+            storageBoard.setSquares(boardDeepCopy);
             board.movePiece(move);
             if(!isInCheck(color))
                 legalMoves.add(move);
