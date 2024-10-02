@@ -51,8 +51,7 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
         Collection<ChessMove> moves = new ArrayList<>();
         if(piece == null) return null;
-        if(piece.getTeamColor() != turn)
-            return moves; //0. ensure that the selected piece is on the current team
+
 
         moves = piece.pieceMoves(board, startPosition); //1. call pieceMoves on the start position
 
@@ -154,6 +153,8 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
         if(legalMoves == null || legalMoves.isEmpty())
+            throw new InvalidMoveException();
+        if(board.getPiece(move.getStartPosition()).getTeamColor() != turn)
             throw new InvalidMoveException();
         if(legalMoves.contains(move))
             board.movePiece(move);

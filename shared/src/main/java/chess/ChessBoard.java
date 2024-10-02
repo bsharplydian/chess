@@ -38,9 +38,7 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
     }
-    public void  setPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()-1][position.getColumn()-1] = piece;
-    }
+
     public ChessPiece[][] getSquares() {
         return squares;
     }
@@ -83,8 +81,23 @@ public class ChessBoard {
     public void movePiece(ChessMove move) {
         //doesn't think about the move at all, just takes a piece and puts it in a destination, replacing whatever is there
         ChessPiece myPiece = getPiece(move.getStartPosition());
-        setPiece(move.getEndPosition(), myPiece);
-        setPiece(move.getStartPosition(), null);
+        this.addPiece(move.getEndPosition(), myPiece);
+        this.addPiece(move.getStartPosition(), null);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder build = new StringBuilder();
+        for(int i = 7; i >= 0; i--) {
+            for(int j = 0; j < 8; j++) {
+                build.append("|");
+                if(squares[i][j] != null)
+                    build.append(squares[i][j].toString());
+                else build.append(" ");
+            }
+            build.append("|\n");
+        }
+        return build.toString();
     }
 
     @Override

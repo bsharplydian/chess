@@ -17,9 +17,24 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        String result = switch(type) {
+            case KING -> "k";
+            case QUEEN -> "q";
+            case BISHOP -> "b";
+            case KNIGHT -> "n";
+            case ROOK -> "r";
+            case PAWN -> "p";
+        };
+        if(pieceColor == ChessGame.TeamColor.WHITE)
+            result = result.toUpperCase();
+        return result;
     }
 
     @Override
@@ -314,10 +329,10 @@ class PawnMoveCalculator extends MoveCalculator {
         int myCol = myPosition.getColumn();
         int direction = 1;
 
-        if(board.getPiece(myPosition).getTeamColor() == chess.ChessGame.TeamColor.WHITE) { //white pawns
+        if(board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) { //white pawns
             direction = 1;
 
-        } else if (board.getPiece(myPosition).getTeamColor() == chess.ChessGame.TeamColor.BLACK) { //black pawns
+        } else if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK) { //black pawns
             direction = -1;
         }
         moves.addAll(choosePawnDirection(myRow, myCol, board, myPosition, thisPiece, direction));
