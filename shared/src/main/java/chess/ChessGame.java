@@ -82,22 +82,41 @@ public class ChessGame {
 
         while(true) {
             ChessPosition checkPos = new ChessPosition(myRow+addRow*distance, myCol+addCol*distance);
-            ChessPiece.PieceType threatType = board.getPiece(checkPos).getPieceType();
-            if(!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() == piece.getTeamColor()) //found an edge or piece of your own team
+            if (!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() == piece.getTeamColor()) //found an edge or piece of your own team
                 return false;
-            if(Math.abs(addRow) == Math.abs(addCol)){ // diagonal
-                if(threatType == ChessPiece.PieceType.BISHOP || threatType == ChessPiece.PieceType.QUEEN)
-                    return true;
-            } else { // cardinal
-                if(threatType == ChessPiece.PieceType.ROOK || threatType == ChessPiece.PieceType.QUEEN)
-                    return true;
+            if(board.getPiece(checkPos) != null) {   //there is in fact a piece there
+                ChessPiece.PieceType threatType = board.getPiece(checkPos).getPieceType();
+                if (Math.abs(addRow) == Math.abs(addCol)) { // diagonal
+                    return threatType == ChessPiece.PieceType.BISHOP || threatType == ChessPiece.PieceType.QUEEN;
+                } else { // cardinal
+                    return threatType == ChessPiece.PieceType.ROOK || threatType == ChessPiece.PieceType.QUEEN;
+                }
             }
             distance++;
 
         }
     }
-    boolean cardinalThreat(ChessPosition startPosition) {
+    boolean checkForKing(ChessPosition startPosition, int addRow, int addCol) {
+        int distance = 1;
+        int myRow = startPosition.getRow();
+        int myCol = startPosition.getColumn();
+        ChessPiece piece = board.getPiece(startPosition);
 
+        while(true) {
+            ChessPosition checkPos = new ChessPosition(myRow + addRow * distance, myCol + addCol * distance);
+            if (!checkPos.isInBounds() || board.getPiece(checkPos).getTeamColor() != piece.getTeamColor()) //found an edge or piece of your own team
+                return false;
+            if (board.getPiece(checkPos) != null) {
+                ChessPiece.PieceType otherType = board.getPiece(checkPos).getPieceType();
+                return otherType == ChessPiece.PieceType.KING;
+            }
+            distance++;
+        }
+    }
+    boolean cardinalThreat(ChessPosition startPosition) {
+        if(checkLaser(startPosition, 0, 1)) {
+
+        }
         return false;
     }
     boolean diagonalThreat(ChessPosition startPosition) {
