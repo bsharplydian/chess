@@ -63,10 +63,19 @@ public class ChessGame {
             //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
                 //then see if there is a king of your color in the opposite direction
             //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
+        for(var move : moves) {
+            ChessBoard hypotheticalBoard = new ChessBoard();
+            hypotheticalBoard.setSquares(board.getSquares());
+
+        }
+        //2 revised. remove any move that would put (or leave) the current team's king in check
+            //a. make a copy of the chessboard and do the move
+            //b. if isInCheck() != true on the copied move, leave the move in
         //3. return the resulting collection
 
 
         //revealed checks: top priority, if you move your king will die
+            //but you COULD move and stay in the line of fire
         //ignored checks: second priority, if you move TO THE WRONG SPOT your king will die
         return moves;
     }
@@ -114,9 +123,14 @@ public class ChessGame {
         }
     }
     boolean cardinalThreat(ChessPosition startPosition) {
-        if(checkLaser(startPosition, 0, 1)) {
-
-        }
+        if(checkLaser(startPosition, 0, 1))
+            return checkForKing(startPosition, 0, -1);
+        if(checkLaser(startPosition, 0, -1))
+            return checkForKing(startPosition, 0, 1);
+        if(checkLaser(startPosition, 1, 0))
+            return checkForKing(startPosition, -1, 0);
+        if(checkLaser(startPosition, -1, 0))
+            return checkForKing(startPosition, 1, 0);
         return false;
     }
     boolean diagonalThreat(ChessPosition startPosition) {
