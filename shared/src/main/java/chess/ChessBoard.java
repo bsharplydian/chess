@@ -81,10 +81,12 @@ public class ChessBoard {
 
     }
     public void movePiece(ChessMove move) {
+        //doesn't think about the move at all, just takes a piece and puts it in a destination, replacing whatever is there
         ChessPiece myPiece = getPiece(move.getStartPosition());
         setPiece(move.getEndPosition(), myPiece);
         setPiece(move.getStartPosition(), null);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

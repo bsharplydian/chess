@@ -63,10 +63,15 @@ public class ChessGame {
             //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
                 //then see if there is a king of your color in the opposite direction
             //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
+        ChessGame.TeamColor color = piece.getTeamColor();
         for(var move : moves) {
-            ChessBoard hypotheticalBoard = new ChessBoard();
-            hypotheticalBoard.setSquares(board.getSquares());
-            board.getPiece(move.getStartPosition());
+
+            ChessBoard storageBoard = new ChessBoard();
+            storageBoard.setSquares(board.getSquares());
+            board.movePiece(move);
+            if(isInCheck(color))
+                moves.remove(move);
+            board.setSquares(storageBoard.getSquares());
         }
         //2 revised. remove any move that would put (or leave) the current team's king in check
             //a. make a copy of the chessboard and do the move
