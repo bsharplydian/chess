@@ -70,8 +70,16 @@ public class ChessGame {
 
             ChessPiece[][] boardDeepCopy = new ChessPiece[8][8];
             ChessPiece[][] squares = board.getSquares();
-            for(int i = 0; i < 8; i++)
-                boardDeepCopy[i] = squares[i].clone();
+            for(int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    ChessPosition copyPos = new ChessPosition(i+1, j+1);
+                    if (board.getPiece(copyPos) == null)
+                        continue;
+                    ChessPiece newPiece = new ChessPiece(board.getPiece(copyPos).getTeamColor(), board.getPiece(copyPos).getPieceType());
+
+                    boardDeepCopy[i][j] = newPiece;
+                }
+            }
 
 
             storageBoard.setSquares(boardDeepCopy);
@@ -144,6 +152,8 @@ public class ChessGame {
         for(int i = 1; i <= 8; i++){
             for(int j = 1; j <= 8; j++) {
                 ChessPosition checkPos = new ChessPosition(i, j);
+                if(board.getPiece(checkPos) == null)
+                    continue;
                 if(board.getPiece(checkPos).getTeamColor() == teamColor) {
                     moves.addAll(validMoves(checkPos));
                 }
@@ -158,13 +168,19 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
         Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
         if(legalMoves == null || legalMoves.isEmpty())
             throw new InvalidMoveException();
         if(board.getPiece(move.getStartPosition()).getTeamColor() != turn)
             throw new InvalidMoveException();
-        if(legalMoves.contains(move))
+        if(legalMoves.contains(move)) {
             board.movePiece(move);
+            turn = switch(board.getPiece(move.getEndPosition()).getTeamColor()) {
+                case WHITE -> TeamColor.BLACK;
+                case BLACK -> TeamColor.WHITE;
+            };
+        }
         else throw new InvalidMoveException();
         //takes a move, ensures that it is valid, then executes it
 
@@ -250,7 +266,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return getAllMoves(teamColor).isEmpty();
         //1. check if isInCheck is true
         //2. check every piece on your team, and if there are no legal moves, return true
     }

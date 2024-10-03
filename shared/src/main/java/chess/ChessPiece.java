@@ -15,7 +15,7 @@ import java.util.Objects;
 public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
-    private PieceType type;
+    private final PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
@@ -74,9 +74,6 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return type;
-    }
-    public void setPieceType(PieceType t) {
-        type = t;
     }
     /**
      * Calculates all the positions a chess piece can move to
