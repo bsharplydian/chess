@@ -52,7 +52,7 @@ public class ChessGame {
         Collection<ChessMove> moves;
         if(piece == null) return null;
 
-        moves = piece.pieceMoves(board, startPosition); //1. call pieceMoves on the start position
+        moves = piece.pieceMoves(board, startPosition);
 
         TeamColor color = piece.getTeamColor();
         Collection<ChessMove> legalMoves = new ArrayList<>();
@@ -160,11 +160,6 @@ public class ChessGame {
         else throw new InvalidMoveException();
         //takes a move, ensures that it is valid, then executes it
 
-        //1. call validMoves on the start position
-        //2. if the resulting list of moves contains the given move:
-        //3. remove the piece from the start position
-        //4. replace any piece at the end position with the piece that was at the start position
-        //5. check if the piece is now threatening the king or has revealed a threat to the king
     }
 
     /**
