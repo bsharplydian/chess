@@ -49,19 +49,11 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        Collection<ChessMove> moves = new ArrayList<>();
+        Collection<ChessMove> moves;
         if(piece == null) return null;
-
 
         moves = piece.pieceMoves(board, startPosition); //1. call pieceMoves on the start position
 
-
-        //2. remove any move that would put (or leave) the current team's king in check
-
-
-            //a. revealed checks: see if a bishop, rook, or queen is threatening your position,
-                //then see if there is a king of your color in the opposite direction
-            //b. ignored checks: run isInCheck, then only allow moves that will block (or capture) the threat
         TeamColor color = piece.getTeamColor();
         Collection<ChessMove> legalMoves = new ArrayList<>();
         for(var move : moves) {
@@ -69,7 +61,7 @@ public class ChessGame {
             ChessBoard storageBoard = new ChessBoard();
 
             ChessPiece[][] boardDeepCopy = new ChessPiece[8][8];
-            ChessPiece[][] squares = board.getSquares();
+
             for(int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
                     ChessPosition copyPos = new ChessPosition(i+1, j+1);
@@ -88,15 +80,7 @@ public class ChessGame {
                 legalMoves.add(move);
             board.setSquares(storageBoard.getSquares());
         }
-        //2 revised. remove any move that would put (or leave) the current team's king in check
-            //a. make a copy of the chessboard and do the move
-            //b. if isInCheck() != true on the copied move, leave the move in
-        //3. return the resulting collection
 
-
-        //revealed checks: top priority, if you move your king will die
-            //but you COULD move and stay in the line of fire
-        //ignored checks: second priority, if you move TO THE WRONG SPOT your king will die
         return legalMoves;
     }
 
@@ -127,24 +111,16 @@ public class ChessGame {
     }
 
     boolean cardinalThreat(ChessPosition startPosition) {
-        if(checkLaser(startPosition, 0, 1) ||
-            checkLaser(startPosition, 0, -1) ||
-            checkLaser(startPosition, 1, 0) ||
-            checkLaser(startPosition, -1, 0)) {
-            return true;
-        } else {
-            return false;
-        }
+        return checkLaser(startPosition, 0, 1) ||
+                checkLaser(startPosition, 0, -1) ||
+                checkLaser(startPosition, 1, 0) ||
+                checkLaser(startPosition, -1, 0);
     }
     boolean diagonalThreat(ChessPosition startPosition) {
-        if(checkLaser(startPosition, 1, 1) ||
+        return checkLaser(startPosition, 1, 1) ||
                 checkLaser(startPosition, 1, -1) ||
                 checkLaser(startPosition, -1, 1) ||
-                checkLaser(startPosition, -1, -1)) {
-            return true;
-        } else {
-            return false;
-        }
+                checkLaser(startPosition, -1, -1);
     }
 
     public Collection<ChessMove> getAllMoves(TeamColor teamColor) {
@@ -267,8 +243,6 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         return getAllMoves(teamColor).isEmpty();
-        //1. check if isInCheck is true
-        //2. check every piece on your team, and if there are no legal moves, return true
     }
 
     /**
