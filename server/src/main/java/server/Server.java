@@ -1,12 +1,16 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
 import model.UserData;
 import service.UserService;
 import spark.*;
 
 public class Server {
-    private final UserService userService = new UserService();
+    private final DataAccess dataAccess = new MemoryDataAccess();
+    private final UserService userService = new UserService(dataAccess);
     public Server() {
 
     }
@@ -32,7 +36,11 @@ public class Server {
 
     private Object addUser(Request req, Response res) {
         var User = new Gson().fromJson(req.body(), UserData.class);
-        userService.register(User);
+        try {
+            userService.register(User);
+        } catch (DataAccessException e) {
+            return e.getMessage();
+        }
         return new Gson().toJson(User);
     }
 }
