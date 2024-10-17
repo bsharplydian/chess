@@ -13,5 +13,8 @@ public class UserService {
     public AuthData register(UserData user) throws DataAccessException {
         return dataAccess.register(user);
     }
+    public Boolean validateAuth(AuthData auth) throws DataAccessException {
+        return true;
+    }
 
 }
