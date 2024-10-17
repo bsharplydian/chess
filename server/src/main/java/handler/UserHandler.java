@@ -1,5 +1,8 @@
 package handler;
 
+import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.UserData;
 import service.UserService;
 import spark.Request;
 import spark.Response;
@@ -18,6 +21,14 @@ public class UserHandler implements Route {
         //serialize java response to JSON
         //send HTTP response back to client
         //receive java
-        return 0;
+        var User = new Gson().fromJson(req.body(), UserData.class);
+        try {
+            userService.register(User);
+        } catch (DataAccessException e) {
+            return new Gson().toJson("""
+                    "error": "happened"
+                    """);
+        }
+        return new Gson().toJson(User);
     }
 }

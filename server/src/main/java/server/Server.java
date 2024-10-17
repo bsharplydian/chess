@@ -21,7 +21,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/user", this::addUserHandler);
+        Spark.post("/user", this::addUser);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -34,7 +34,7 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object addUserHandler(Request req, Response res) {
+    private Object addUser(Request req, Response res) {
         var User = new Gson().fromJson(req.body(), UserData.class);
         try {
             userService.register(User);
