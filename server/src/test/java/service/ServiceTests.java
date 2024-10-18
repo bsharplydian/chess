@@ -21,7 +21,7 @@ public class ServiceTests {
         Assertions.assertNotNull(db.getAuth(registerRes.authToken()));
     }
     @Test
-    public void registerAuth() {
+    public void registerAndCheckAuth() {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         UserData newUser = new UserData("james", "12345", "james@mynameisjames.com");
@@ -31,4 +31,17 @@ public class ServiceTests {
         Assertions.assertEquals("james", authData.username());
     }
 
+    @Test
+    public void clear() {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData newUser = new UserData("james", "12345", "james@mynameisjames.com");
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        Assertions.assertNotNull(db.getUser("james"));
+
+        service.clear();
+
+        Assertions.assertNull(db.getUser("james"));
+
+    }
 }

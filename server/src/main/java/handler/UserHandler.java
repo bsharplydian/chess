@@ -9,7 +9,7 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
-public class UserHandler implements Route {
+public class UserHandler {
     private final UserService userService;
     public UserHandler(UserService userService) {
 
@@ -25,6 +25,7 @@ public class UserHandler implements Route {
 
         /* actual to do list:
         -add logic to determine WHAT service method needs to be called (register, login, logout)
+        -move try-catch block into Server class (where it says) (also do this for ClearHandler)
          */
         var User = new Gson().fromJson(req.body(), UserData.class);
         try {

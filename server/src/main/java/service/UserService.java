@@ -30,5 +30,8 @@ public class UserService {
     public Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
     }
+    public void clear() {
+        dataAccess.clear();
+    }
 
 }

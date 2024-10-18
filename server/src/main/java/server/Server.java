@@ -24,6 +24,7 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::addUser);
+        Spark.delete("/db", this::clear);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -39,5 +40,8 @@ public class Server {
     private Object addUser(Request req, Response res) {
         UserHandler userHandler = new UserHandler(userService);
         return userHandler.handle(req, res);
+    }
+    private Object clear(Request req, Response res) {
+        return 1;
     }
 }
