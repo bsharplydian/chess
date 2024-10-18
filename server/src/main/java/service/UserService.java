@@ -18,10 +18,13 @@ public class UserService {
         //move logic from dataaccess to service
         if(dataAccess.getUser(request.username()) == null)
             dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
+        else {
+            // throw an already exists error
+        }
 
         String token = UUID.randomUUID().toString();
         AuthData auth = new AuthData(request.username(), token);
-
+        dataAccess.createAuth(auth);
         return new RegisterResponse(request.username(), token);
     }
     public Boolean validateAuth(AuthData auth) throws DataAccessException {

@@ -22,8 +22,11 @@ public class UserHandler implements Route {
         //serialize java response to JSON
         //send HTTP response back to client
         //receive java
-        var User = new Gson().fromJson(req.body(), UserData.class);
 
+        /* actual to do list:
+        -add logic to determine WHAT service method needs to be called (register, login, logout)
+         */
+        var User = new Gson().fromJson(req.body(), UserData.class);
         try {
             userService.register(new RegisterRequest(User.username(), User.password(), User.email()));
         } catch (Exception e) {
