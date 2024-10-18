@@ -5,6 +5,7 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.UserData;
+import request.RegisterRequest;
 import service.UserService;
 import spark.*;
 
@@ -37,7 +38,7 @@ public class Server {
     private Object addUser(Request req, Response res) {
         var User = new Gson().fromJson(req.body(), UserData.class);
         try {
-            userService.register(User);
+            userService.register(new RegisterRequest(User.username(), User.password(), User.email()));
         } catch (Exception e) {
             return e.getMessage();
         }

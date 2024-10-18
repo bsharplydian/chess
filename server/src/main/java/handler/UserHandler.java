@@ -3,6 +3,7 @@ package handler;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.UserData;
+import request.RegisterRequest;
 import service.UserService;
 import spark.Request;
 import spark.Response;
@@ -15,7 +16,7 @@ public class UserHandler implements Route {
         this.userService = userService;
     }
     public Object handle(Request req, Response res) {
-        //validate auth token
+        //validate auth token if needed for operation
         //deserialize JSON request to java request object
         //call UserService.someMethod & give it java request object
         //serialize java response to JSON
@@ -24,7 +25,7 @@ public class UserHandler implements Route {
         var User = new Gson().fromJson(req.body(), UserData.class);
 
         try {
-            userService.register(User);
+            userService.register(new RegisterRequest(User.username(), User.password(), User.email()));
         } catch (Exception e) {
             return new Gson().toJson("""
                     "error": "happened"

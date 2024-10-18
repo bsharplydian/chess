@@ -4,6 +4,8 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
+import request.RegisterRequest;
+import response.RegisterResponse;
 
 import java.util.UUID;
 
@@ -12,15 +14,15 @@ public class UserService {
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    public AuthData register(UserData user) {
+    public RegisterResponse register(RegisterRequest request) {
         //move logic from dataaccess to service
-        if(dataAccess.getUser(user.username()) == null)
-            dataAccess.createUser(user);
+        if(dataAccess.getUser(request.username()) == null)
+            dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
 
         String token = UUID.randomUUID().toString();
-        AuthData auth = new AuthData(user.username(), token);
+        AuthData auth = new AuthData(request.username(), token);
 
-        return auth;
+        return new RegisterResponse(request.username(), token);
     }
     public Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
