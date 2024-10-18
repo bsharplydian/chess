@@ -24,7 +24,6 @@ public class ServiceTests {
     public void registerAndCheckAuth() {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-        UserData newUser = new UserData("james", "12345", "james@mynameisjames.com");
         var registerResult = service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
         AuthData authData = new AuthData(registerResult.username(), registerResult.authToken());
         Assertions.assertEquals(36, authData.authToken().length());
@@ -35,7 +34,6 @@ public class ServiceTests {
     public void clear() {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-        UserData newUser = new UserData("james", "12345", "james@mynameisjames.com");
         service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
         Assertions.assertNotNull(db.getUser("james"));
 
