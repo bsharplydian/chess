@@ -38,7 +38,7 @@ public class Server {
         var User = new Gson().fromJson(req.body(), UserData.class);
         try {
             userService.register(User);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             return e.getMessage();
         }
         return new Gson().toJson(User);

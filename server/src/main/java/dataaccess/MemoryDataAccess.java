@@ -3,14 +3,19 @@ package dataaccess;
 import model.AuthData;
 import model.UserData;
 
-import java.util.UUID;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MemoryDataAccess implements DataAccess {
-    public AuthData register(UserData user) {
-        String token = UUID.randomUUID().toString();
-        AuthData auth = new AuthData(token, user.username());
-        user = new UserData(user.username(), user.password(), user.email());
 
-        return auth;
+    Map<String, UserData> users = new HashMap<>();
+    public UserData getUser(String username) {
+        return users.get(username);
     }
+
+    public void createUser(UserData userData) {
+        users.put(userData.username(), userData);
+    }
+
 }

@@ -22,9 +22,10 @@ public class UserHandler implements Route {
         //send HTTP response back to client
         //receive java
         var User = new Gson().fromJson(req.body(), UserData.class);
+
         try {
             userService.register(User);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             return new Gson().toJson("""
                     "error": "happened"
                     """);
