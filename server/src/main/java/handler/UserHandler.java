@@ -16,7 +16,7 @@ public class UserHandler {
 
         this.userService = userService;
     }
-    public Object handle(Request req, Response res) {
+    public Object handle(Request req, Response res) throws DataAccessException {
         //validate auth token if needed for operation
         //deserialize JSON request to java request object
         //call UserService.someMethod & give it java request object
@@ -29,13 +29,17 @@ public class UserHandler {
         -move try-catch block into Server class (where it says) (also do this for ClearHandler)
          */
         RegisterResponse registerResponse;
-        var User = new Gson().fromJson(req.body(), UserData.class);
+        var User = new Gson().fromJson(req.body(), UserData.class); //deserialize json
+        RegisterRequest registerRequest = new RegisterRequest(User.username(), User.password(), User.email());
+
         try {
-            registerResponse = userService.register(new RegisterRequest(User.username(), User.password(), User.email()));
-        } catch (Exception e) {
-            return new Gson().toJson("""
-                    "error": "happened"
-                    """);
+            registerResponse = userService.register(registerRequest);
+        } catch (DataAccessException e) {
+            return new Gson().toJson(e.getMessage());
+        }
+        if(registerResponse.message() != null) {
+            if (registerResponse.message().equals("Error: already taken"))
+                res.status(403);
         }
         return new Gson().toJson(registerResponse);
     }

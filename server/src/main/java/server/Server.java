@@ -24,8 +24,12 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/user", this::addUser);
-        Spark.delete("/db", this::clear);
+        try {
+            Spark.post("/user", this::addUser);
+            Spark.delete("/db", this::clear);
+        } catch (Exception e) {
+
+        }
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -38,7 +42,7 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object addUser(Request req, Response res) {
+    private Object addUser(Request req, Response res) throws DataAccessException {
         UserHandler userHandler = new UserHandler(userService);
         return userHandler.handle(req, res);
     }

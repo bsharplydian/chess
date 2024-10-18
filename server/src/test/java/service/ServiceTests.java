@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
@@ -11,7 +12,7 @@ import request.RegisterRequest;
 public class ServiceTests {
 
     @Test
-    public void register() {
+    public void register() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         UserData newUser = new UserData("james", "12345", "james@mynameisjames.com");
@@ -21,7 +22,7 @@ public class ServiceTests {
         Assertions.assertNotNull(db.getAuth(registerRes.authToken()));
     }
     @Test
-    public void registerAndCheckAuth() {
+    public void registerAndCheckAuth() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         var registerResult = service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
@@ -34,7 +35,7 @@ public class ServiceTests {
 
 
     @Test
-    public void clear() {
+    public void clear() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));

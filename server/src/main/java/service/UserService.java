@@ -14,17 +14,21 @@ public class UserService {
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    public RegisterResponse register(RegisterRequest request) {
-        if(dataAccess.getUser(request.username()) == null)
+    public RegisterResponse register(RegisterRequest request) throws DataAccessException {
+        RegisterResponse response;
+        if(dataAccess.getUser(request.username()) == null) {
             dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
+            String token = UUID.randomUUID().toString();
+            AuthData auth = new AuthData(request.username(), token);
+            dataAccess.createAuth(auth);
+            response = new RegisterResponse(request.username(), token, null);
+        }
         else {
-            // throw an already exists error
+            response = new RegisterResponse(null, null, "Error: already taken");
         }
 
-        String token = UUID.randomUUID().toString();
-        AuthData auth = new AuthData(request.username(), token);
-        dataAccess.createAuth(auth);
-        return new RegisterResponse(request.username(), token, null);
+
+        return response;
     }
     public Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
