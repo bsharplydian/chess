@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import handler.UserHandler;
 import model.UserData;
 import request.RegisterRequest;
 import service.UserService;
@@ -36,12 +37,7 @@ public class Server {
     }
 
     private Object addUser(Request req, Response res) {
-        var User = new Gson().fromJson(req.body(), UserData.class);
-        try {
-            userService.register(new RegisterRequest(User.username(), User.password(), User.email()));
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-        return new Gson().toJson(User);
+        UserHandler userHandler = new UserHandler(userService);
+        return userHandler.handle(req, res);
     }
 }

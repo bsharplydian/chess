@@ -11,7 +11,7 @@ import spark.Route;
 
 public class UserHandler implements Route {
     private final UserService userService;
-    UserHandler(UserService userService) {
+    public UserHandler(UserService userService) {
 
         this.userService = userService;
     }
