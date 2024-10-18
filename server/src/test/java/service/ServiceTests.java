@@ -28,7 +28,10 @@ public class ServiceTests {
         AuthData authData = new AuthData(registerResult.username(), registerResult.authToken());
         Assertions.assertEquals(36, authData.authToken().length());
         Assertions.assertEquals("james", authData.username());
+
+        //this test doesn't do anything
     }
+
 
     @Test
     public void clear() {

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import handler.ClearHandler;
 import handler.UserHandler;
 import model.UserData;
 import request.RegisterRequest;
@@ -42,6 +43,7 @@ public class Server {
         return userHandler.handle(req, res);
     }
     private Object clear(Request req, Response res) {
-        return 1;
+        ClearHandler clearHandler = new ClearHandler(userService);
+        return clearHandler.handle(req, res);
     }
 }

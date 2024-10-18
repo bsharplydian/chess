@@ -15,7 +15,6 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
     public RegisterResponse register(RegisterRequest request) {
-        //move logic from dataaccess to service
         if(dataAccess.getUser(request.username()) == null)
             dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
         else {
@@ -25,7 +24,7 @@ public class UserService {
         String token = UUID.randomUUID().toString();
         AuthData auth = new AuthData(request.username(), token);
         dataAccess.createAuth(auth);
-        return new RegisterResponse(request.username(), token);
+        return new RegisterResponse(request.username(), token, null);
     }
     public Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
