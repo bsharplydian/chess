@@ -7,8 +7,10 @@ import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
 import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
+import response.LogoutResponse;
 
 
 public class ServiceTests {
@@ -69,7 +71,16 @@ public class ServiceTests {
 
     @Test
     public void LogoutSuccess() throws DataAccessException {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = service.login(loginRequest);
+
+        LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
+        LogoutResponse logoutResponse = service.logout(logoutRequest);
+        Assertions.assertNull(logoutResponse.message());
     }
 
     @Test

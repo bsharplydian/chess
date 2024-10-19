@@ -31,6 +31,7 @@ public class Server {
             Spark.post("/user", this::addUser);
             Spark.delete("/db", this::clear);
             Spark.post("/session", this::login);
+            Spark.delete("/session", this::logout);
         } catch (Exception e) {
 
         }
