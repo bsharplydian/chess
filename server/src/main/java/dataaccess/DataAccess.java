@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 public interface DataAccess {
@@ -12,4 +13,7 @@ public interface DataAccess {
     void clear();
 
     void deleteAuth(String s);
+
+    int createGame(String s);
+    GameData getGame(int gameID);
 }
