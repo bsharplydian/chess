@@ -40,9 +40,8 @@ public class UserHandler {
     }
     private Object registerUser(Request req, Response res) {
         RegisterResponse registerResponse;
-        //var User = new Gson().fromJson(req.body(), UserData.class); //deserialize json
-        //RegisterRequest registerRequest = new RegisterRequest(User.username(), User.password(), User.email());
         RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
+
         try {
             registerResponse = userService.register(registerRequest);
         } catch (DataAccessException e) {
@@ -59,7 +58,11 @@ public class UserHandler {
     private Object loginUser(Request req, Response res) {
         LoginResponse loginResponse;
         LoginRequest loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
-
-        return "{loginResponse}";
+        try {
+            loginResponse = userService.login(loginRequest);
+        } catch (DataAccessException e) {
+            return new Gson().toJson(e.getMessage());
+        }
+        return new Gson().toJson(loginResponse);
     }
 }

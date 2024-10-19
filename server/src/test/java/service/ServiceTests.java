@@ -6,7 +6,9 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
+import request.LoginRequest;
 import request.RegisterRequest;
+import response.LoginResponse;
 
 
 public class ServiceTests {
@@ -33,7 +35,21 @@ public class ServiceTests {
         //this test doesn't do anything
     }
 
+    @Test
+    public void loginSuccess() throws DataAccessException {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = service.login(loginRequest);
+        Assertions.assertNull(loginResponse.message());
+    }
+    @Test
+    @Disabled
+    public void LoginFail() throws DataAccessException {
+
+    }
     @Test
     public void clear() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();

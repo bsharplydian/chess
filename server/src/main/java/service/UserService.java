@@ -4,7 +4,9 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
+import request.LoginRequest;
 import request.RegisterRequest;
+import response.LoginResponse;
 import response.RegisterResponse;
 
 import java.util.UUID;
@@ -31,14 +33,28 @@ public class UserService {
             dataAccess.createAuth(auth);
             response = new RegisterResponse(request.username(), token, null);
         }
-
-
-        
         return response;
     }
+
     private Boolean invalidRegisterInput(RegisterRequest request) {
         return request.username() == null || request.email() == null || request.password() == null;
     }
+
+    public LoginResponse login(LoginRequest request) throws DataAccessException {
+        LoginResponse response;
+        UserData user = dataAccess.getUser(request.username());
+        if(user == null || !user.password().equals(request.password()))
+            response = new LoginResponse(null, null, "Error: unauthorized");
+        else {
+            String token = UUID.randomUUID().toString();
+            AuthData auth = new AuthData(request.username(), token);
+            dataAccess.createAuth(auth);
+            response = new LoginResponse(request.username(), token, null);
+        }
+
+        return response;
+    }
+
     private Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
     }
