@@ -60,7 +60,18 @@ public class GameHandler {
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-
+        if(Objects.equals(joinResponse.message(), "Error: bad request"))
+            res.status(400);
+        else if(Objects.equals(joinResponse.message(), "Error: unauthorized"))
+            res.status(401);
+        else if(Objects.equals(joinResponse.message(), "Error: already taken"))
+            res.status(403);
+        else if(joinResponse.message() != null)
+            res.status(500);
         return new Gson().toJson(joinResponse);
+    }
+
+    private Object listGames(Request req, Response res) {
+
     }
 }
