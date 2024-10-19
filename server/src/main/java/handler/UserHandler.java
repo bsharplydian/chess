@@ -74,7 +74,8 @@ public class UserHandler {
     }
     private Object logoutUser(Request req, Response res) {
         LogoutResponse logoutResponse;
-        LogoutRequest logoutRequest = new Gson().fromJson("{\"AuthToken\":\"" + req.headers("Authorization") + "\"}", LogoutRequest.class);
+        LogoutRequest logoutRequest = new LogoutRequest(req.headers("Authorization"));
+        //Gson().fromJson("{\"AuthToken\":\"" + req.headers("Authorization") + "\"}", LogoutRequest.class);
         try {
             logoutResponse = userService.logout(logoutRequest);
         } catch (DataAccessException e) {
