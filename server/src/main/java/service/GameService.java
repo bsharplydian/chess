@@ -46,16 +46,8 @@ public class GameService {
         else if(colorAlreadyExists(request.playerColor(), oldGameData))
             response = new JoinResponse("Error: already taken");
 
-        else if(request.playerColor().equals("WHITE")) {
-            newGameData = new GameData(oldGameData.gameID(), userData.username(),
-                    oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
-
-            dataAccess.updateGame(gameID, newGameData);
-            response = new JoinResponse(null);
-        } else {
-            newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
-                    userData.username(), oldGameData.gameName(), oldGameData.game());
-
+        else {
+            newGameData = addUserToGame(request.playerColor(), oldGameData, userData);
             dataAccess.updateGame(gameID, newGameData);
             response = new JoinResponse(null);
         }
@@ -68,5 +60,16 @@ public class GameService {
     private Boolean colorAlreadyExists(String color, GameData gameData) {
         return (color.equals("WHITE") && gameData.whiteUsername() != null) ||
                 (color.equals("BLACK") && gameData.blackUsername() != null);
+    }
+    private GameData addUserToGame(String color, GameData oldGameData, UserData userData) {
+        GameData newGameData;
+        if(color.equals("WHITE")) {
+            newGameData = new GameData(oldGameData.gameID(), userData.username(),
+                    oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+        } else {
+            newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                    userData.username(), oldGameData.gameName(), oldGameData.game());
+        }
+        return newGameData;
     }
 }
