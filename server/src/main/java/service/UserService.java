@@ -16,7 +16,9 @@ public class UserService {
     }
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
         RegisterResponse response;
-        if(dataAccess.getUser(request.username()) == null) {
+        if(request.username() == null || request.email() == null || request.password() == null)
+            response = new RegisterResponse(null, null, "Error: bad request");
+        else if(dataAccess.getUser(request.username()) == null) { // no match -> register given user
             dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
             String token = UUID.randomUUID().toString();
             AuthData auth = new AuthData(request.username(), token);
@@ -26,8 +28,7 @@ public class UserService {
         else {
             response = new RegisterResponse(null, null, "Error: already taken");
         }
-
-
+        
         return response;
     }
     public Boolean validateAuth(AuthData auth) throws DataAccessException {

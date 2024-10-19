@@ -40,6 +40,8 @@ public class UserHandler {
         if(registerResponse.message() != null) {
             if (registerResponse.message().equals("Error: already taken"))
                 res.status(403);
+            else if(registerResponse.message().equals("Error: bad request"))
+                res.status(400);
         }
         return new Gson().toJson(registerResponse);
     }
