@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import model.GameData;
 import request.CreateRequest;
 import request.JoinRequest;
 import response.CreateResponse;
@@ -33,14 +34,16 @@ public class GameService {
 
     public JoinResponse joinGame(JoinRequest request) {
         JoinResponse response;
+        GameData gameData = dataAccess.getGame(Integer.parseInt(request.gameID()));
         if(invalidJoinInput(request))
-            response = new JoinResponse("Error:bad request");
+            response = new JoinResponse("Error: bad request");
         else if(dataAccess.getAuth(request.authToken()) == null)
             response = new JoinResponse("Error: unauthorized");
-        else {
+        else if(request.playerColor().equals("WHITE") && gameData.whiteUsername() != null ||
+                request.playerColor().equals("BLACK") && gameData.blackUsername() != null)
+            response = new JoinResponse("Error: already taken");
 
-            response = new JoinResponse(null);
-        }
+        else response = new JoinResponse(null);
 
         return response;
     }
