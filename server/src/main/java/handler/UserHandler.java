@@ -13,6 +13,8 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.util.Objects;
+
 public class UserHandler {
     private final UserService userService;
     public UserHandler(UserService userService) {
@@ -47,12 +49,11 @@ public class UserHandler {
         } catch (DataAccessException e) {
             return new Gson().toJson(e.getMessage());
         }
-        if (registerResponse.message() != null) {
-            if (registerResponse.message().equals("Error: already taken"))
-                res.status(403);
-            else if (registerResponse.message().equals("Error: bad request"))
-                res.status(400);
-        }
+        if (Objects.equals(registerResponse.message(), "Error: already taken"))
+            res.status(403);
+        else if (Objects.equals(registerResponse.message(), "Error: bad request"))
+            res.status(400);
+
         return new Gson().toJson(registerResponse);
     }
     private Object loginUser(Request req, Response res) {
@@ -62,6 +63,9 @@ public class UserHandler {
             loginResponse = userService.login(loginRequest);
         } catch (DataAccessException e) {
             return new Gson().toJson(e.getMessage());
+        }
+        if(loginResponse.message() != null) {
+
         }
         return new Gson().toJson(loginResponse);
     }
