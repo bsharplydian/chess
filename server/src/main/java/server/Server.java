@@ -27,6 +27,7 @@ public class Server {
         try {
             Spark.post("/user", this::addUser);
             Spark.delete("/db", this::clear);
+            Spark.post("/session", this::login);
         } catch (Exception e) {
 
         }
@@ -46,8 +47,12 @@ public class Server {
         UserHandler userHandler = new UserHandler(userService);
         return userHandler.handle(req, res);
     }
-    private Object clear(Request req, Response res) {
+    private Object clear(Request req, Response res) throws DataAccessException {
         ClearHandler clearHandler = new ClearHandler(userService);
         return clearHandler.handle(req, res);
+    }
+    private Object login(Request req, Response res) throws DataAccessException {
+        UserHandler userHandler = new UserHandler(userService);
+        return userHandler.handle(req, res);
     }
 }
