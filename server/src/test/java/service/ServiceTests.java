@@ -8,10 +8,7 @@ import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
 import request.*;
-import response.CreateResponse;
-import response.JoinResponse;
-import response.LoginResponse;
-import response.LogoutResponse;
+import response.*;
 
 
 public class ServiceTests {
@@ -120,8 +117,21 @@ public class ServiceTests {
         String gameID = createResponse.gameID();
         JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHITE", gameID);
         JoinResponse joinResponse = gameService.joinGame(joinRequest);
+        Assertions.assertNull(joinResponse.message());
     }
 
+    @Test
+    public void listSuccess() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
+
+        ListRequest listRequest = new ListRequest(loginResponse.authToken());
+        ListResponse listResponse = gameService.listGames(listRequest);
+        Assertions.assertNull(listResponse.message());
+    }
     @Test
     public void clear() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));

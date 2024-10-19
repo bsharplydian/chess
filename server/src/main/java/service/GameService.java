@@ -5,9 +5,13 @@ import model.GameData;
 import model.UserData;
 import request.CreateRequest;
 import request.JoinRequest;
+import request.ListRequest;
 import response.CreateResponse;
 import response.JoinResponse;
+import response.ListResponse;
 
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -55,15 +59,15 @@ public class GameService {
         return response;
     }
     private Boolean invalidJoinInput(JoinRequest request) {
-        return request.gameID() == null || (!request.playerColor().equals("WHITE") && !request.playerColor().equals("BLACK"));
+        return request.gameID() == null || (!Objects.equals(request.playerColor(), "WHITE") && !Objects.equals(request.playerColor(), "BLACK"));
     }
     private Boolean colorAlreadyExists(String color, GameData gameData) {
-        return (color.equals("WHITE") && gameData.whiteUsername() != null) ||
-                (color.equals("BLACK") && gameData.blackUsername() != null);
+        return (Objects.equals(color, "WHITE") && gameData.whiteUsername() != null) ||
+                (Objects.equals(color, "BLACK") && gameData.blackUsername() != null);
     }
     private GameData addUserToGame(String color, GameData oldGameData, UserData userData) {
         GameData newGameData;
-        if(color.equals("WHITE")) {
+        if(Objects.equals(color, "WHITE")) {
             newGameData = new GameData(oldGameData.gameID(), userData.username(),
                     oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
         } else {
@@ -71,5 +75,17 @@ public class GameService {
                     userData.username(), oldGameData.gameName(), oldGameData.game());
         }
         return newGameData;
+    }
+
+    public ListResponse listGames(ListRequest request) {
+        ListResponse response;
+        ArrayList<GameData> gameList;
+        if(dataAccess.getAuth(request.authToken()) == null)
+            response = new ListResponse(null,"Error: unauthorized");
+        else {
+            gameList = dataAccess.listGames();
+            response = new ListResponse(gameList, null);
+        }
+        return response;
     }
 }

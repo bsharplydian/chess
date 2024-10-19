@@ -5,6 +5,8 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
+
 public interface DataAccess {
 //    AuthData register(UserData user);
     void createUser(UserData userData);
@@ -19,4 +21,5 @@ public interface DataAccess {
     int createGame(String s);
     GameData getGame(int gameID);
     void updateGame(int gameID, GameData gameData);
+    ArrayList<GameData> listGames();
 }

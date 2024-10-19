@@ -83,7 +83,6 @@ public class UserHandler {
             res.status(401);
         else if (logoutResponse.message() != null)
             res.status(500);
-
         return new Gson().toJson(logoutResponse);
     }
 }

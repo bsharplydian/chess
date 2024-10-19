@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import request.CreateRequest;
 import request.JoinRequest;
+import request.ListRequest;
 import response.CreateResponse;
 import response.JoinResponse;
+import response.ListResponse;
 import server.GameRequestType;
 import service.GameService;
 import spark.Request;
@@ -21,7 +23,7 @@ public class GameHandler {
     public Object handle(Request req, Response res, GameRequestType gameRequestType) throws DataAccessException {
         return switch(gameRequestType) {
             case CREATE -> createGame(req, res);
-            case LIST -> "list not implemented";
+            case LIST -> listGames(req, res);
             case JOIN -> joinGame(req, res);
         };
     }
@@ -30,15 +32,23 @@ public class GameHandler {
     */
     private String addHeaderToBody(Request req, String headerObjectSignature, String headerJsonSignature) {
         //String result = "{\"" + req.headers(header) + "\"" + req.body().substring(1);
-        String result = String.format("""
-        {"%s":"%s", %s
-        """, headerObjectSignature, req.headers(headerJsonSignature), req.body().substring(1));
+        String result;
+        String body = req.body();
+        if(req.body() == null || req.body().isEmpty()) {
+            result = String.format("""
+                    {"%s":"%s"}
+                    """, headerObjectSignature, req.headers(headerJsonSignature));
+        } else {
+            result = String.format("""
+                    {"%s":"%s", %s
+                    """, headerObjectSignature, req.headers(headerJsonSignature), req.body().substring(1));
+        }
         return result;
     }
     private Object createGame(Request req, Response res) {
         CreateResponse createResponse;
-        String HeaderBodyJson = addHeaderToBody(req, "authToken", "Authorization");
-        CreateRequest createRequest = new Gson().fromJson(HeaderBodyJson, CreateRequest.class);
+        String headerBodyJson = addHeaderToBody(req, "authToken", "Authorization");
+        CreateRequest createRequest = new Gson().fromJson(headerBodyJson, CreateRequest.class);
         try{
             createResponse = gameService.createGame(createRequest);
         } catch (Exception e) {
@@ -53,8 +63,8 @@ public class GameHandler {
 
     private Object joinGame(Request req, Response res) {
         JoinResponse joinResponse;
-        String HeaderBodyJson = addHeaderToBody(req, "authToken", "Authorization");
-        JoinRequest joinRequest = new Gson().fromJson(HeaderBodyJson, JoinRequest.class);
+        String headerBodyJson = addHeaderToBody(req, "authToken", "Authorization");
+        JoinRequest joinRequest = new Gson().fromJson(headerBodyJson, JoinRequest.class);
         try {
             joinResponse = gameService.joinGame(joinRequest);
         } catch (Exception e) {
@@ -72,6 +82,15 @@ public class GameHandler {
     }
 
     private Object listGames(Request req, Response res) {
-
+        ListResponse listResponse;
+        String headerBodyJson = addHeaderToBody(req, "authToken", "Authorization");
+        ListRequest listRequest = new Gson().fromJson(headerBodyJson, ListRequest.class);
+        try {
+            listResponse = gameService.listGames(listRequest);
+        } catch (Exception e) {
+            return new Gson().toJson(e.getMessage());
+        }
+        String response = new Gson().toJson(listResponse);
+        return new Gson().toJson(listResponse);
     }
 }

@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,10 @@ public class MemoryDataAccess implements DataAccess {
     }
     public UserData getUserByAuth(String authToken) {
         AuthData authData = getAuth(authToken);
-        return getUser(authData.username());
+        if(authData == null)
+            return null;
+        else
+            return getUser(authData.username());
     }
 
     public void createAuth(AuthData authData) {
@@ -49,6 +53,10 @@ public class MemoryDataAccess implements DataAccess {
 
     public void updateGame(int gameID, GameData gameData) {
         games.put(gameID, gameData);
+    }
+
+    public ArrayList<GameData> listGames() {
+        return new ArrayList<>(games.values());
     }
 
     public void clear() {
