@@ -46,10 +46,32 @@ public class ServiceTests {
         Assertions.assertNull(loginResponse.message());
     }
     @Test
-    @Disabled
-    public void LoginFail() throws DataAccessException {
+    public void LoginFailDoesntExist() throws DataAccessException {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+
+        LoginRequest loginRequest = new LoginRequest("patrick", "12345");
+        LoginResponse loginResponse = service.login(loginRequest);
+        Assertions.assertNotNull(loginResponse.message());
+    }
+
+    @Test
+    public void LoginFailWrongPassword() throws DataAccessException {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+
+        LoginRequest loginRequest = new LoginRequest("james", "01234");
+        LoginResponse loginResponse = service.login(loginRequest);
+        Assertions.assertNotNull(loginResponse.message());
+    }
+
+    @Test
+    public void LogoutSuccess() throws DataAccessException {
 
     }
+
     @Test
     public void clear() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();

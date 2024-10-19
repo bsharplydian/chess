@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.UserData;
 import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
+import response.LogoutResponse;
 import response.RegisterResponse;
 import server.RequestType;
 import service.UserService;
@@ -37,6 +39,8 @@ public class UserHandler {
             return registerUser(req, res);
         } else if (requestType == RequestType.LOGIN) {
             return loginUser(req, res);
+        } else if (requestType == RequestType.LOGOUT) {
+            return logoutUser(req, res);
         }
         else return "{}";
     }
@@ -67,5 +71,15 @@ public class UserHandler {
         if(Objects.equals(loginResponse.message(), "Error: unauthorized"))
             res.status(401);
         return new Gson().toJson(loginResponse);
+    }
+    private Object logoutUser(Request req, Response res) {
+        LogoutResponse logoutResponse;
+        LogoutRequest logoutRequest = new Gson().fromJson(req.headers("authorization"), LogoutRequest.class);
+        try {
+            logoutResponse = userService.logout(logoutRequest);
+        } catch (DataAccessException e) {
+            return new Gson().toJson(e.getMessage());
+        }
+        return new Gson().toJson(logoutResponse);
     }
 }

@@ -5,8 +5,10 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
+import response.LogoutResponse;
 import response.RegisterResponse;
 
 import java.util.UUID;
@@ -52,6 +54,11 @@ public class UserService {
             response = new LoginResponse(request.username(), token, null);
         }
 
+        return response;
+    }
+
+    public LogoutResponse logout(LogoutRequest request) throws DataAccessException {
+        LogoutResponse response = new LogoutResponse(null);
         return response;
     }
 

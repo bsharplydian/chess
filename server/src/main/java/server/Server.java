@@ -11,9 +11,12 @@ import request.RegisterRequest;
 import service.UserService;
 import spark.*;
 
+import javax.xml.crypto.Data;
+
 public class Server {
     private final DataAccess dataAccess = new MemoryDataAccess();
     private final UserService userService = new UserService(dataAccess);
+    private final UserHandler userHandler = new UserHandler(userService);
     public Server() {
 
     }
@@ -44,7 +47,6 @@ public class Server {
     }
 
     private Object addUser(Request req, Response res) throws DataAccessException {
-        UserHandler userHandler = new UserHandler(userService);
         return userHandler.handle(req, res, RequestType.REGISTER);
     }
     private Object clear(Request req, Response res) throws DataAccessException {
@@ -52,7 +54,9 @@ public class Server {
         return clearHandler.handle(req, res);
     }
     private Object login(Request req, Response res) throws DataAccessException {
-        UserHandler userHandler = new UserHandler(userService);
         return userHandler.handle(req, res, RequestType.LOGIN);
+    }
+    private Object logout(Request req, Response res) throws DataAccessException {
+        return userHandler.handle(req, res, RequestType.LOGOUT);
     }
 }
