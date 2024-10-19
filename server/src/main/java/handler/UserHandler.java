@@ -31,10 +31,6 @@ public class UserHandler {
         //send HTTP response back to client
         //receive java
 
-        /* actual to do list:
-        -add logic to determine WHAT service method needs to be called (register, login, logout)
-        -move try-catch block into Server class (where it says) (also do this for ClearHandler)
-         */
         if(requestType == RequestType.REGISTER) {
             return registerUser(req, res);
         } else if (requestType == RequestType.LOGIN) {
@@ -57,6 +53,8 @@ public class UserHandler {
             res.status(403);
         else if (Objects.equals(registerResponse.message(), "Error: bad request"))
             res.status(400);
+        else if (registerResponse.message() != null)
+            res.status(500);
 
         return new Gson().toJson(registerResponse);
     }
@@ -70,6 +68,9 @@ public class UserHandler {
         }
         if(Objects.equals(loginResponse.message(), "Error: unauthorized"))
             res.status(401);
+        else if (loginResponse.message() != null)
+            res.status(500);
+
         return new Gson().toJson(loginResponse);
     }
     private Object logoutUser(Request req, Response res) {
@@ -83,6 +84,9 @@ public class UserHandler {
         }
         if(Objects.equals(logoutResponse.message(), "Error: unauthorized"))
             res.status(401);
+        else if (logoutResponse.message() != null)
+            res.status(500);
+
         return new Gson().toJson(logoutResponse);
     }
 }
