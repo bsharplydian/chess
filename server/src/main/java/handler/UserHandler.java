@@ -81,6 +81,7 @@ public class UserHandler {
         } catch (DataAccessException e) {
             return new Gson().toJson(e.getMessage());
         }
+
         return new Gson().toJson(logoutResponse);
     }
 }

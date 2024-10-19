@@ -25,6 +25,9 @@ public class MemoryDataAccess implements DataAccess {
     public AuthData getAuth(String authToken) {
         return authtokens.get(authToken);
     }
+    public void deleteAuth(String authToken) {
+        authtokens.remove(authToken);
+    }
 
     public void clear() {
         users.clear();

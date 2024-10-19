@@ -81,6 +81,7 @@ public class ServiceTests {
         LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
         LogoutResponse logoutResponse = service.logout(logoutRequest);
         Assertions.assertNull(logoutResponse.message());
+        Assertions.assertNull(db.getAuth(loginResponse.authToken()));
     }
 
     @Test

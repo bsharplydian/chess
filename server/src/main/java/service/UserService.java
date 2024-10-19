@@ -58,7 +58,14 @@ public class UserService {
     }
 
     public LogoutResponse logout(LogoutRequest request) throws DataAccessException {
-        LogoutResponse response = new LogoutResponse(null);
+        LogoutResponse response;
+        AuthData auth = dataAccess.getAuth(request.authToken());
+        if(auth == null)
+            response = new LogoutResponse("Error: unauthorized");
+        else {
+            dataAccess.deleteAuth(request.authToken());
+            response = new LogoutResponse(null);
+        }
         return response;
     }
 
