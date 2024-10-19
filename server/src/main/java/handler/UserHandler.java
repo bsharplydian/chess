@@ -64,9 +64,8 @@ public class UserHandler {
         } catch (DataAccessException e) {
             return new Gson().toJson(e.getMessage());
         }
-        if(loginResponse.message() != null) {
-
-        }
+        if(Objects.equals(loginResponse.message(), "Error: unauthorized"))
+            res.status(401);
         return new Gson().toJson(loginResponse);
     }
 }
