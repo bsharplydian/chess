@@ -2,18 +2,16 @@ package handler;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import model.UserData;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
 import response.LogoutResponse;
 import response.RegisterResponse;
-import server.RequestType;
+import server.UserRequestType;
 import service.UserService;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 import java.util.Objects;
 
@@ -23,7 +21,7 @@ public class UserHandler {
 
         this.userService = userService;
     }
-    public Object handle(Request req, Response res, RequestType requestType) throws DataAccessException {
+    public Object handle(Request req, Response res, UserRequestType userRequestType) throws DataAccessException {
         //validate auth token if needed for operation
         //deserialize JSON request to java request object
         //call UserService.someMethod & give it java request object
@@ -31,11 +29,11 @@ public class UserHandler {
         //send HTTP response back to client
         //receive java
 
-        if(requestType == RequestType.REGISTER) {
+        if(userRequestType == UserRequestType.REGISTER) {
             return registerUser(req, res);
-        } else if (requestType == RequestType.LOGIN) {
+        } else if (userRequestType == UserRequestType.LOGIN) {
             return loginUser(req, res);
-        } else if (requestType == RequestType.LOGOUT) {
+        } else if (userRequestType == UserRequestType.LOGOUT) {
             return logoutUser(req, res);
         }
         else return "{}";
@@ -76,7 +74,6 @@ public class UserHandler {
     private Object logoutUser(Request req, Response res) {
         LogoutResponse logoutResponse;
         LogoutRequest logoutRequest = new LogoutRequest(req.headers("Authorization"));
-        //Gson().fromJson("{\"AuthToken\":\"" + req.headers("Authorization") + "\"}", LogoutRequest.class);
         try {
             logoutResponse = userService.logout(logoutRequest);
         } catch (DataAccessException e) {

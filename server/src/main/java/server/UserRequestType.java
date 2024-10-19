@@ -1,7 +1,7 @@
 package server;
 
-public enum RequestType {
+public enum UserRequestType {
     REGISTER,
     LOGIN,
-    LOGOUT, CLEAR
+    LOGOUT,
 }
