@@ -44,8 +44,8 @@ public class MemoryDataAccess implements DataAccess {
         return games.get(gameID);
     }
 
-    public void updateGame(int gameID, String whiteUsername, String blackUsername) {
-
+    public void updateGame(int gameID, GameData gameData) {
+        games.put(gameID, gameData);
     }
 
     public void clear() {

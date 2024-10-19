@@ -38,6 +38,7 @@ public class GameService {
         else if(dataAccess.getAuth(request.authToken()) == null)
             response = new JoinResponse("Error: unauthorized");
         else {
+
             response = new JoinResponse(null);
         }
 
