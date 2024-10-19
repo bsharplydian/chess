@@ -85,6 +85,22 @@ public class ServiceTests {
     }
 
     @Test
+    @Disabled
+    public void LogoutFail() throws DataAccessException {
+        MemoryDataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        service.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = service.login(loginRequest);
+
+        LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
+        LogoutResponse logoutResponse = service.logout(logoutRequest);
+        Assertions.assertNotNull(logoutResponse.message());
+        Assertions.assertNotNull(db.getAuth(loginResponse.authToken()));
+    }
+
+    @Test
     public void clear() throws DataAccessException {
         MemoryDataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
