@@ -7,11 +7,9 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
-import request.CreateRequest;
-import request.LoginRequest;
-import request.LogoutRequest;
-import request.RegisterRequest;
+import request.*;
 import response.CreateResponse;
+import response.JoinResponse;
 import response.LoginResponse;
 import response.LogoutResponse;
 
@@ -105,10 +103,25 @@ public class ServiceTests {
         LoginRequest loginRequest = new LoginRequest("james", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
 
-        CreateResponse createResponse = gameService.createGame(new CreateRequest(loginResponse.authToken(), "myGame"));
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
         Assertions.assertNotEquals(createResponse.gameID(), null);
         Assertions.assertNotNull(db.getGame(Integer.parseInt(createResponse.gameID())));
     }
+
+    @Test
+    public void joinSuccess() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
+
+        String gameID = createResponse.gameID();
+        JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHITE", gameID);
+        JoinResponse joinResponse = gameService.joinGame(joinRequest);
+    }
+
     @Test
     public void clear() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));

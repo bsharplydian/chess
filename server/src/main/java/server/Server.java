@@ -34,6 +34,7 @@ public class Server {
             Spark.delete("/session", this::logout);
             Spark.post("/game", this::createGame);
             Spark.put("/game", this::joinGame);
+
         } catch (Exception e) {
 
         }
