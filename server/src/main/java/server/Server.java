@@ -45,7 +45,7 @@ public class Server {
 
     private Object addUser(Request req, Response res) throws DataAccessException {
         UserHandler userHandler = new UserHandler(userService);
-        return userHandler.handle(req, res);
+        return userHandler.handle(req, res, RequestType.REGISTER);
     }
     private Object clear(Request req, Response res) throws DataAccessException {
         ClearHandler clearHandler = new ClearHandler(userService);
@@ -53,6 +53,6 @@ public class Server {
     }
     private Object login(Request req, Response res) throws DataAccessException {
         UserHandler userHandler = new UserHandler(userService);
-        return userHandler.handle(req, res);
+        return userHandler.handle(req, res, RequestType.LOGIN);
     }
 }
