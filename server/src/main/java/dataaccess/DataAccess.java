@@ -16,4 +16,5 @@ public interface DataAccess {
 
     int createGame(String s);
     GameData getGame(int gameID);
+    void updateGame(int gameID, String whiteUsername, String blackUsername);
 }

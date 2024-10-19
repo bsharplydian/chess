@@ -33,6 +33,7 @@ public class Server {
             Spark.post("/session", this::login);
             Spark.delete("/session", this::logout);
             Spark.post("/game", this::createGame);
+            Spark.put("/game", this::joinGame);
         } catch (Exception e) {
 
         }
@@ -63,5 +64,8 @@ public class Server {
     }
     private Object createGame(Request req, Response res) throws DataAccessException {
         return gameHandler.handle(req, res, GameRequestType.CREATE);
+    }
+    private Object joinGame(Request req, Response res) throws DataAccessException {
+        return gameHandler.handle(req, res, GameRequestType.JOIN);
     }
 }

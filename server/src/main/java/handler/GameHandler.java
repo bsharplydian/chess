@@ -3,7 +3,9 @@ package handler;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import request.CreateRequest;
+import request.JoinRequest;
 import response.CreateResponse;
+import response.JoinResponse;
 import server.GameRequestType;
 import service.GameService;
 import spark.Request;
@@ -20,7 +22,7 @@ public class GameHandler {
         return switch(gameRequestType) {
             case CREATE -> createGame(req, res);
             case LIST -> "list not implemented";
-            case JOIN -> "join not implemented";
+            case JOIN -> joinGame(req, res);
         };
     }
     /*
@@ -47,5 +49,18 @@ public class GameHandler {
         else if (createResponse.message() != null)
             res.status(500);
         return new Gson().toJson(createResponse);
+    }
+
+    private Object joinGame(Request req, Response res) {
+        JoinResponse joinResponse;
+        String HeaderBodyJson = addHeaderToBody(req, "authToken", "Authorization");
+        JoinRequest joinRequest = new Gson().fromJson(HeaderBodyJson, JoinRequest.class);
+        try {
+            joinResponse = gameService.joinGame(joinRequest);
+        } catch (Exception e) {
+            return new Gson().toJson(e.getMessage());
+        }
+
+        return new Gson().toJson(joinResponse);
     }
 }

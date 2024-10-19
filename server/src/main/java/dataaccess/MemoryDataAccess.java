@@ -44,6 +44,10 @@ public class MemoryDataAccess implements DataAccess {
         return games.get(gameID);
     }
 
+    public void updateGame(int gameID, String whiteUsername, String blackUsername) {
+
+    }
+
     public void clear() {
         users.clear();
         authtokens.clear();
