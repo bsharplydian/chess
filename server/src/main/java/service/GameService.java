@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import model.GameData;
+import model.UserData;
 import request.CreateRequest;
 import request.JoinRequest;
 import response.CreateResponse;
@@ -34,20 +35,38 @@ public class GameService {
 
     public JoinResponse joinGame(JoinRequest request) {
         JoinResponse response;
-        GameData gameData = dataAccess.getGame(Integer.parseInt(request.gameID()));
+        GameData oldGameData = dataAccess.getGame(Integer.parseInt(request.gameID()));
+        UserData userData = dataAccess.getUserByAuth(request.authToken());
+        GameData newGameData;
+        int gameID = oldGameData.gameID();
         if(invalidJoinInput(request))
             response = new JoinResponse("Error: bad request");
         else if(dataAccess.getAuth(request.authToken()) == null)
             response = new JoinResponse("Error: unauthorized");
-        else if(request.playerColor().equals("WHITE") && gameData.whiteUsername() != null ||
-                request.playerColor().equals("BLACK") && gameData.blackUsername() != null)
+        else if(colorAlreadyExists(request.playerColor(), oldGameData))
             response = new JoinResponse("Error: already taken");
 
-        else response = new JoinResponse(null);
+        else if(request.playerColor().equals("WHITE")) {
+            newGameData = new GameData(oldGameData.gameID(), userData.username(),
+                    oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+
+            dataAccess.updateGame(gameID, newGameData);
+            response = new JoinResponse(null);
+        } else {
+            newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                    userData.username(), oldGameData.gameName(), oldGameData.game());
+
+            dataAccess.updateGame(gameID, newGameData);
+            response = new JoinResponse(null);
+        }
 
         return response;
     }
     private Boolean invalidJoinInput(JoinRequest request) {
-        return request.gameID() == null || request.playerColor() == null;
+        return request.gameID() == null || (!request.playerColor().equals("WHITE") && !request.playerColor().equals("BLACK"));
+    }
+    private Boolean colorAlreadyExists(String color, GameData gameData) {
+        return (color.equals("WHITE") && gameData.whiteUsername() != null) ||
+                (color.equals("BLACK") && gameData.blackUsername() != null);
     }
 }
