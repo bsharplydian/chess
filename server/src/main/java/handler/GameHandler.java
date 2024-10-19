@@ -35,6 +35,12 @@ public class GameHandler {
         CreateResponse createResponse;
         String HeaderBodyJson = addHeaderToBody(req, "authToken", "Authorization");
         CreateRequest createRequest = new Gson().fromJson(HeaderBodyJson, CreateRequest.class);
-        return "{}";
+        try{
+            createResponse = gameService.createGame(createRequest);
+        } catch (Exception e) {
+            return new Gson().toJson(e.getMessage());
+        }
+
+        return new Gson().toJson(createResponse);
     }
 }

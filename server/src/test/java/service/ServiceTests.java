@@ -3,12 +3,15 @@ package service;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
+import request.CreateRequest;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
+import response.CreateResponse;
 import response.LoginResponse;
 import response.LogoutResponse;
 
@@ -18,11 +21,13 @@ public class ServiceTests {
     private static UserService userService;
     private static GameService gameService;
     private static UserData newUser;
+    private static GameData newGame;
 
     @BeforeAll
     public static void init() {
         db = new MemoryDataAccess();
         userService = new UserService(db);
+        gameService = new GameService(db);
         newUser = new UserData("james", "12345", "james@mynameisjames.com");
     }
     @Test
@@ -51,7 +56,7 @@ public class ServiceTests {
         Assertions.assertNull(loginResponse.message());
     }
     @Test
-    public void LoginFailDoesntExist() throws DataAccessException {
+    public void loginFailDoesntExist() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
         LoginRequest loginRequest = new LoginRequest("patrick", "12345");
@@ -60,7 +65,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void LoginFailWrongPassword() throws DataAccessException {
+    public void loginFailWrongPassword() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
         LoginRequest loginRequest = new LoginRequest("james", "01234");
@@ -69,7 +74,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void LogoutSuccess() throws DataAccessException {
+    public void logoutSuccess() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
         LoginRequest loginRequest = new LoginRequest("james", "12345");
@@ -83,7 +88,7 @@ public class ServiceTests {
 
     @Test
     @Disabled
-    public void LogoutFail() throws DataAccessException {
+    public void logoutFail() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
         LoginRequest loginRequest = new LoginRequest("james", "12345");
@@ -94,7 +99,15 @@ public class ServiceTests {
         Assertions.assertNotNull(logoutResponse.message());
         Assertions.assertNotNull(db.getAuth(loginResponse.authToken()));
     }
+    @Test
+    public void createSuccess() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
 
+        CreateResponse createResponse = gameService.createGame(new CreateRequest(loginResponse.authToken(), "myGame"));
+        Assertions.assertNotEquals(createResponse.gameID(), 0);
+    }
     @Test
     public void clear() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
