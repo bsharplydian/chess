@@ -9,6 +9,8 @@ import service.GameService;
 import spark.Request;
 import spark.Response;
 
+import java.util.Objects;
+
 public class GameHandler {
     private final GameService gameService;
     public GameHandler(GameService gameService) {
@@ -40,7 +42,10 @@ public class GameHandler {
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-
+        if(Objects.equals(createResponse.message(), "Error: unauthorized"))
+            res.status(401);
+        else if (createResponse.message() != null)
+            res.status(500);
         return new Gson().toJson(createResponse);
     }
 }

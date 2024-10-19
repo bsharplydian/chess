@@ -16,9 +16,11 @@ public class GameService {
     public CreateResponse createGame(CreateRequest request) {
         CreateResponse response;
         if(invalidCreateInput(request))
-            response = new CreateResponse(-1, "Error: bad request");
+            response = new CreateResponse(null, "Error: bad request");
+        else if(dataAccess.getAuth(request.authToken()) == null)
+            response = new CreateResponse(null, "Error: unauthorized");
         else {
-            int gameID = dataAccess.createGame(request.gameName());
+            String gameID = Integer.toString(dataAccess.createGame(request.gameName()));
             response = new CreateResponse(gameID, null);
         }
         return response;

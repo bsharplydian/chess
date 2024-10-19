@@ -106,8 +106,8 @@ public class ServiceTests {
         LoginResponse loginResponse = userService.login(loginRequest);
 
         CreateResponse createResponse = gameService.createGame(new CreateRequest(loginResponse.authToken(), "myGame"));
-        Assertions.assertNotEquals(createResponse.gameID(), -1);
-        Assertions.assertNotNull(db.getGame(createResponse.gameID()));
+        Assertions.assertNotEquals(createResponse.gameID(), null);
+        Assertions.assertNotNull(db.getGame(Integer.parseInt(createResponse.gameID())));
     }
     @Test
     public void clear() throws DataAccessException {
