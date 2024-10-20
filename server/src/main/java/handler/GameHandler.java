@@ -90,7 +90,10 @@ public class GameHandler {
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-        String response = new Gson().toJson(listResponse);
+        if(Objects.equals(listResponse.message(), "Error: unauthorized"))
+            res.status(401);
+        else if(listResponse.message() != null)
+            res.status(500);
         return new Gson().toJson(listResponse);
     }
 }

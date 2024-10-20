@@ -38,16 +38,20 @@ public class GameService {
     }
 
     public JoinResponse joinGame(JoinRequest request) {
+        // for security, rejecting bad requests/unauthorized users should come before manipulating data
+        if(invalidJoinInput(request))
+            return new JoinResponse("Error: bad request");
+        else if(dataAccess.getAuth(request.authToken()) == null)
+            return new JoinResponse("Error: unauthorized");
+
         JoinResponse response;
         GameData oldGameData = dataAccess.getGame(Integer.parseInt(request.gameID()));
         UserData userData = dataAccess.getUserByAuth(request.authToken());
         GameData newGameData;
         int gameID = oldGameData.gameID();
-        if(invalidJoinInput(request))
-            response = new JoinResponse("Error: bad request");
-        else if(dataAccess.getAuth(request.authToken()) == null)
-            response = new JoinResponse("Error: unauthorized");
-        else if(colorAlreadyExists(request.playerColor(), oldGameData))
+
+
+        if(colorAlreadyExists(request.playerColor(), oldGameData))
             response = new JoinResponse("Error: already taken");
 
         else {
