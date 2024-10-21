@@ -132,7 +132,8 @@ abstract class MoveCalculator {
         this.myPosition = myPosition;
     }
 
-    Collection<ChessMove> checkLaser(int row, int column, int range, ChessBoard board, ChessPosition position, ChessPiece thisPiece, int direction) {
+    Collection<ChessMove> checkLaser(int row, int column, int range, ChessBoard board, ChessPosition position,
+                                     ChessPiece thisPiece, int direction) {
         /** 0=north
          * 2=east
          * 4=sout

@@ -68,9 +68,6 @@ public class UserService {
         return response;
     }
 
-    private Boolean validateAuth(AuthData auth) throws DataAccessException {
-        return true;
-    }
 
     public void clear() {
         dataAccess.clear();
