@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Arrays;
 import java.util.Objects;
+
 import chess.ChessPiece.PieceType;
 import chess.ChessGame.TeamColor;
 
@@ -13,8 +14,9 @@ import chess.ChessGame.TeamColor;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
+
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -24,7 +26,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()-1][position.getColumn()-1] = piece;
+        squares[position.getRow() - 1][position.getColumn() - 1] = piece;
 
     }
 
@@ -36,23 +38,26 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()-1][position.getColumn()-1];
+        return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
     public ChessPiece[][] getSquares() {
         return squares;
     }
+
     public void setSquares(ChessPiece[][] squares) {
         this.squares = squares;
     }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     private void setTeamPieces(TeamColor color) {
         int rank = 0;
-        if(color == TeamColor.BLACK)
+        if (color == TeamColor.BLACK) {
             rank = 7;
+        }
         squares[rank][0] = new ChessPiece(color, PieceType.ROOK);
         squares[rank][1] = new ChessPiece(color, PieceType.KNIGHT);
         squares[rank][2] = new ChessPiece(color, PieceType.BISHOP);
@@ -64,11 +69,13 @@ public class ChessBoard {
 
         //front rank
         rank = 1;
-        if(color == TeamColor.BLACK)
+        if (color == TeamColor.BLACK) {
             rank = 6;
-        for(int i = 0; i < 8; i++)
+        }
+        for (int i = 0; i < 8; i++)
             squares[rank][i] = new ChessPiece(color, PieceType.PAWN);
     }
+
     public void resetBoard() {
         var white = ChessGame.TeamColor.WHITE;
         var black = ChessGame.TeamColor.BLACK;
@@ -78,28 +85,30 @@ public class ChessBoard {
 
 
     }
+
     public void movePiece(ChessMove move) {
         //doesn't think about the move at all, just takes a piece and puts it in a destination, replacing whatever is there
         ChessPiece myPiece = getPiece(move.getStartPosition());
-        if(move.getPromotionPiece() != null) {
+        if (move.getPromotionPiece() != null) {
             ChessPiece newPiece = new ChessPiece(myPiece.getTeamColor(), move.getPromotionPiece());
             this.addPiece(move.getEndPosition(), newPiece);
-        }
-
-        else
+        } else {
             this.addPiece(move.getEndPosition(), myPiece);
+        }
         this.addPiece(move.getStartPosition(), null);
     }
 
     @Override
     public String toString() {
         StringBuilder build = new StringBuilder();
-        for(int i = 7; i >= 0; i--) {
-            for(int j = 0; j < 8; j++) {
+        for (int i = 7; i >= 0; i--) {
+            for (int j = 0; j < 8; j++) {
                 build.append("|");
-                if(squares[i][j] != null)
+                if (squares[i][j] != null) {
                     build.append(squares[i][j].toString());
-                else build.append(" ");
+                } else {
+                    build.append(" ");
+                }
             }
             build.append("|\n");
         }
@@ -108,8 +117,12 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessBoard that = (ChessBoard) o;
         return Objects.deepEquals(squares, that.squares);
     }

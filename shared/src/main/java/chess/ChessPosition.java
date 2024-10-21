@@ -17,12 +17,13 @@ public class ChessPosition {
         this.row = row;
         this.col = col;
     }
+
     /* override toString
-    */
+     */
     @Override
     public String toString() {
         String letter = "";
-        switch(getColumn()){
+        switch (getColumn()) {
             case 0:
                 letter = "NEVER APPEARS";
                 break;
@@ -53,6 +54,7 @@ public class ChessPosition {
         }
         return letter + getRow();
     }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
@@ -68,13 +70,19 @@ public class ChessPosition {
     public int getColumn() {
         return col;
     }
+
     public boolean isInBounds() {
         return row <= 8 && row >= 1 && col <= 8 && col >= 1;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessPosition that = (ChessPosition) o;
         return row == that.row && col == that.col;
     }
