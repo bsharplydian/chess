@@ -72,8 +72,9 @@ public class ChessBoard {
         if (color == TeamColor.BLACK) {
             rank = 6;
         }
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++) {
             squares[rank][i] = new ChessPiece(color, PieceType.PAWN);
+        }
     }
 
     public void resetBoard() {

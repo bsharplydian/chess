@@ -132,9 +132,6 @@ abstract class MoveCalculator {
         this.myPosition = myPosition;
     }
 
-    //    Collection<ChessMove> calculateMoves() {
-//
-//    }
     Collection<ChessMove> checkLaser(int row, int column, int range, ChessBoard board, ChessPosition position, ChessPiece thisPiece, int direction) {
         /** 0=north
          * 2=east
@@ -246,8 +243,9 @@ class BishopMoveCalculator extends MoveCalculator {
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        for (int i = 1; i < 8; i += 2)
+        for (int i = 1; i < 8; i += 2) {
             moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece, i));
+        }
         return moves;
     }
 }
@@ -268,8 +266,9 @@ class RookMoveCalculator extends MoveCalculator {
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        for (int i = 0; i < 8; i += 2)
+        for (int i = 0; i < 8; i += 2) {
             moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece, i));
+        }
         return moves;
     }
 }
@@ -290,8 +289,9 @@ class QueenMoveCalculator extends MoveCalculator {
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a laser in each direction and adds the available spaces in each direction to moves
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++) {
             moves.addAll(checkLaser(myRow, myCol, 8, board, myPosition, thisPiece, i));
+        }
         return moves;
     }
 }
@@ -312,8 +312,9 @@ class KingMoveCalculator extends MoveCalculator {
         int myRow = myPosition.getRow();
         int myCol = myPosition.getColumn();
         //checks a single square in each direction and adds the available spaces in each direction to moves
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++) {
             moves.addAll(checkLaser(myRow, myCol, 1, board, myPosition, thisPiece, i));
+        }
         return moves;
     }
 
