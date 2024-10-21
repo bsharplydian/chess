@@ -156,7 +156,8 @@ abstract class MoveCalculator {
                 default -> new ChessPosition(1, 1);
             };
             if (!checkPos.isInBounds() || counter == 0) {
-                break; // ensures that the checked position is within the bounds of the board and that it is within the range of the piece (either 1 or infinity)
+                break; // ensures that the checked position is within the bounds of the board and that
+                        // it is within the range of the piece (either 1 or infinity)
             }
 
             ChessMove potentialMove = new ChessMove(position, checkPos, null);
