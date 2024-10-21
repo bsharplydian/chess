@@ -15,19 +15,18 @@ import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
+
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
         RegisterResponse response;
-        if(invalidRegisterInput(request))
+        if (invalidRegisterInput(request)) {
             response = new RegisterResponse(null, null, "Error: bad request");
-        else if(dataAccess.getUser(request.username()) != null) {
+        } else if (dataAccess.getUser(request.username()) != null) {
             response = new RegisterResponse(null, null, "Error: already taken");
-        }
-
-        else { // no match -> register given user
+        } else { // no match -> register given user
             dataAccess.createUser(new UserData(request.username(), request.password(), request.email()));
 
             String token = UUID.randomUUID().toString();
@@ -45,9 +44,9 @@ public class UserService {
     public LoginResponse login(LoginRequest request) throws DataAccessException {
         LoginResponse response;
         UserData user = dataAccess.getUser(request.username());
-        if(user == null || !user.password().equals(request.password()))
+        if (user == null || !user.password().equals(request.password())) {
             response = new LoginResponse(null, null, "Error: unauthorized");
-        else {
+        } else {
             String token = UUID.randomUUID().toString();
             AuthData auth = new AuthData(request.username(), token);
             dataAccess.createAuth(auth);
@@ -60,9 +59,9 @@ public class UserService {
     public LogoutResponse logout(LogoutRequest request) throws DataAccessException {
         LogoutResponse response;
         AuthData auth = dataAccess.getAuth(request.authToken());
-        if(auth == null)
+        if (auth == null) {
             response = new LogoutResponse("Error: unauthorized");
-        else {
+        } else {
             dataAccess.deleteAuth(request.authToken());
             response = new LogoutResponse(null);
         }
@@ -72,6 +71,7 @@ public class UserService {
     private Boolean validateAuth(AuthData auth) throws DataAccessException {
         return true;
     }
+
     public void clear() {
         dataAccess.clear();
     }

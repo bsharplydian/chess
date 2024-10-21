@@ -19,23 +19,28 @@ public class MemoryDataAccess implements DataAccess {
     public void createUser(UserData userData) {
         users.put(userData.username(), userData);
     }
+
     public UserData getUser(String username) {
         return users.get(username);
     }
+
     public UserData getUserByAuth(String authToken) {
         AuthData authData = getAuth(authToken);
-        if(authData == null)
+        if (authData == null) {
             return null;
-        else
+        } else {
             return getUser(authData.username());
+        }
     }
 
     public void createAuth(AuthData authData) {
         authtokens.put(authData.authToken(), authData);
     }
+
     public AuthData getAuth(String authToken) {
         return authtokens.get(authToken);
     }
+
     public void deleteAuth(String authToken) {
         authtokens.remove(authToken);
     }
@@ -47,6 +52,7 @@ public class MemoryDataAccess implements DataAccess {
         games.put(gameID, gameData);
         return gameID;
     }
+
     public GameData getGame(int gameID) {
         return games.get(gameID);
     }

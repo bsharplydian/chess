@@ -17,16 +17,19 @@ import java.util.Objects;
 
 public class GameHandler {
     private final GameService gameService;
+
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
     }
+
     public Object handle(Request req, Response res, GameRequestType gameRequestType) throws DataAccessException {
-        return switch(gameRequestType) {
+        return switch (gameRequestType) {
             case CREATE -> createGame(req, res);
             case LIST -> listGames(req, res);
             case JOIN -> joinGame(req, res);
         };
     }
+
     /*
     adds the selected header as the first element of the body's json
     */
@@ -34,7 +37,7 @@ public class GameHandler {
         //String result = "{\"" + req.headers(header) + "\"" + req.body().substring(1);
         String result;
         String body = req.body();
-        if(req.body() == null || req.body().isEmpty()) {
+        if (req.body() == null || req.body().isEmpty()) {
             result = String.format("""
                     {"%s":"%s"}
                     """, headerObjectSignature, req.headers(headerJsonSignature));
@@ -45,19 +48,21 @@ public class GameHandler {
         }
         return result;
     }
+
     private Object createGame(Request req, Response res) {
         CreateResponse createResponse;
         String headerBodyJson = addHeaderToBody(req, "authToken", "Authorization");
         CreateRequest createRequest = new Gson().fromJson(headerBodyJson, CreateRequest.class);
-        try{
+        try {
             createResponse = gameService.createGame(createRequest);
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-        if(Objects.equals(createResponse.message(), "Error: unauthorized"))
+        if (Objects.equals(createResponse.message(), "Error: unauthorized")) {
             res.status(401);
-        else if (createResponse.message() != null)
+        } else if (createResponse.message() != null) {
             res.status(500);
+        }
         return new Gson().toJson(createResponse);
     }
 
@@ -70,14 +75,15 @@ public class GameHandler {
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-        if(Objects.equals(joinResponse.message(), "Error: bad request"))
+        if (Objects.equals(joinResponse.message(), "Error: bad request")) {
             res.status(400);
-        else if(Objects.equals(joinResponse.message(), "Error: unauthorized"))
+        } else if (Objects.equals(joinResponse.message(), "Error: unauthorized")) {
             res.status(401);
-        else if(Objects.equals(joinResponse.message(), "Error: already taken"))
+        } else if (Objects.equals(joinResponse.message(), "Error: already taken")) {
             res.status(403);
-        else if(joinResponse.message() != null)
+        } else if (joinResponse.message() != null) {
             res.status(500);
+        }
         return new Gson().toJson(joinResponse);
     }
 
@@ -90,10 +96,11 @@ public class GameHandler {
         } catch (Exception e) {
             return new Gson().toJson(e.getMessage());
         }
-        if(Objects.equals(listResponse.message(), "Error: unauthorized"))
+        if (Objects.equals(listResponse.message(), "Error: unauthorized")) {
             res.status(401);
-        else if(listResponse.message() != null)
+        } else if (listResponse.message() != null) {
             res.status(500);
+        }
         return new Gson().toJson(listResponse);
     }
 }
