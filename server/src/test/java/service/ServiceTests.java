@@ -25,54 +25,62 @@ public class ServiceTests {
         gameService = new GameService(db);
         newUser = new UserData("james", "12345", "james@mynameisjames.com");
     }
+
+    @BeforeEach
+    public void reset() throws DataAccessException {
+        userService.clear();
+        userService.register(new RegisterRequest("DefaultUser", "12345", "james@mynameisjames.com"));
+    }
+    //list of all public methods
+    //register
     @Test
-    public void register() throws DataAccessException {
+    public void registerSuccess() throws DataAccessException {
         var registerRes = userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
         Assertions.assertEquals(newUser, db.getUser("james"));
         Assertions.assertNotNull(db.getAuth(registerRes.authToken()));
     }
     @Test
-    public void registerAndCheckAuth() throws DataAccessException {
-        var registerResult = userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
-        AuthData authData = new AuthData(registerResult.username(), registerResult.authToken());
-        Assertions.assertEquals(36, authData.authToken().length());
-        Assertions.assertEquals("james", authData.username());
-
-        //this test doesn't do anything
+    public void registerAlreadyExists() throws DataAccessException {
+        var registerRes = userService.register(new RegisterRequest("james", "12345", "jamesjohnson@mynameisjames.com"));
+        var registerResAgain = userService.register(new RegisterRequest("james", "abcde", "jamesfrederickson@jamesisthebest.com"));
+        Assertions.assertNotNull(registerResAgain.message());
     }
-
+    @Test
+    public void registerInvalidInput() throws DataAccessException {
+        var registerRes = userService.register(new RegisterRequest("james", null, "jamesjohnson@mynameisjames.com"));
+        Assertions.assertNotNull(registerRes.message());
+    }
+    //login
     @Test
     public void loginSuccess() throws DataAccessException {
-        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
-        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginRequest loginRequest = new LoginRequest("DefaultUser", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
         Assertions.assertNull(loginResponse.message());
     }
     @Test
-    public void loginFailDoesntExist() throws DataAccessException {
-        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+    public void loginDoesntExist() throws DataAccessException {
 
-        LoginRequest loginRequest = new LoginRequest("patrick", "12345");
+        LoginRequest loginRequest = new LoginRequest("patrick", "nothisispatrick");
         LoginResponse loginResponse = userService.login(loginRequest);
         Assertions.assertNotNull(loginResponse.message());
+        Assertions.assertNull(loginResponse.authToken());
     }
 
     @Test
-    public void loginFailWrongPassword() throws DataAccessException {
-        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+    public void loginWrongPassword() throws DataAccessException {
 
         LoginRequest loginRequest = new LoginRequest("james", "01234");
         LoginResponse loginResponse = userService.login(loginRequest);
         Assertions.assertNotNull(loginResponse.message());
     }
 
+    //logout
     @Test
     public void logoutSuccess() throws DataAccessException {
-        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
-        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginRequest loginRequest = new LoginRequest("DefaultUser", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
 
         LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
@@ -82,18 +90,20 @@ public class ServiceTests {
     }
 
     @Test
-    @Disabled
-    public void logoutFail() throws DataAccessException {
+    public void logoutUnauthorized() throws DataAccessException {
+        //user attempts to log out but doesn't have auth token
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
-
         LoginRequest loginRequest = new LoginRequest("james", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
 
         LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
         LogoutResponse logoutResponse = userService.logout(logoutRequest);
-        Assertions.assertNotNull(logoutResponse.message());
-        Assertions.assertNotNull(db.getAuth(loginResponse.authToken()));
+
+        LogoutRequest logoutRequestAgain = new LogoutRequest(loginResponse.authToken());
+        LogoutResponse logoutResponseAgain = userService.logout(logoutRequestAgain);
+        Assertions.assertNotNull(logoutResponseAgain.message());
     }
+    //createGame
     @Test
     public void createSuccess() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
@@ -105,25 +115,100 @@ public class ServiceTests {
         Assertions.assertNotEquals(createResponse.gameID(), null);
         Assertions.assertNotNull(db.getGame(Integer.parseInt(createResponse.gameID())));
     }
+    @Test
+    public void createUnauthorized() throws DataAccessException {
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
 
+        LogoutRequest logoutRequest = new LogoutRequest(loginResponse.authToken());
+        LogoutResponse logoutResponse = userService.logout(logoutRequest);
+
+        CreateResponse createResponse = gameService.createGame(new CreateRequest(loginResponse.authToken(), "myGame"));
+        Assertions.assertNotNull(createResponse.message());
+    }
+
+    @Test
+    public void createBadInput() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), null);
+        CreateResponse createResponse = gameService.createGame(createRequest);
+        Assertions.assertNull(createResponse.gameID());
+        Assertions.assertNotNull(createResponse.message());
+    }
+    //joinGame
     @Test
     public void joinSuccess() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
         LoginRequest loginRequest = new LoginRequest("james", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
+        LoginRequest loginRequest2 = new LoginRequest("DefaultUser", "12345");
+        LoginResponse loginResponse2 = userService.login(loginRequest2);
         CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
         CreateResponse createResponse = gameService.createGame(createRequest);
-
         String gameID = createResponse.gameID();
         JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHITE", gameID);
         JoinResponse joinResponse = gameService.joinGame(joinRequest);
+        JoinRequest joinRequest2 = new JoinRequest(loginResponse2.authToken(), "BLACK", gameID);
+        JoinResponse joinResponse2 = gameService.joinGame(joinRequest2);
         Assertions.assertNull(joinResponse.message());
+        Assertions.assertNull(joinResponse2.message());
     }
 
     @Test
-    public void listSuccess() throws DataAccessException {
+    public void joinUnauthorized() throws DataAccessException {
         userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
         LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
+        String gameID = createResponse.gameID();
+        LogoutResponse logoutResponse = userService.logout(new LogoutRequest(loginResponse.authToken()));
+
+        JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHITE", gameID);
+        JoinResponse joinResponse = gameService.joinGame(joinRequest);
+        Assertions.assertNotNull(joinResponse.message());
+    }
+
+    @Test
+    public void joinBadRequest() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
+        String gameID = createResponse.gameID();
+        LogoutResponse logoutResponse = userService.logout(new LogoutRequest(loginResponse.authToken()));
+
+        JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHIT", gameID);
+        JoinResponse joinResponse = gameService.joinGame(joinRequest);
+        Assertions.assertNotNull(joinResponse.message());
+    }
+
+    @Test
+    public void joinAlreadyTaken() throws DataAccessException {
+        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
+        userService.register(new RegisterRequest("john", "123456", "john@mynameisjohn.com"));
+        LoginRequest loginRequest = new LoginRequest("james", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        LoginResponse loginResponse2 = userService.login(new LoginRequest("john", "123456"));
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        CreateResponse createResponse = gameService.createGame(createRequest);
+        String gameID = createResponse.gameID();
+
+
+        JoinRequest joinRequest = new JoinRequest(loginResponse.authToken(), "WHITE", gameID);
+        JoinRequest joinRequest2 = new JoinRequest(loginResponse2.authToken(), "WHITE", gameID);
+        JoinResponse joinResponse = gameService.joinGame(joinRequest);
+        JoinResponse joinResponse2 = gameService.joinGame(joinRequest2);
+        Assertions.assertNotNull(joinResponse2.message());
+    }
+    //listGames
+    @Test
+    public void listSuccess() throws DataAccessException {
+        LoginRequest loginRequest = new LoginRequest("DefaultUser", "12345");
         LoginResponse loginResponse = userService.login(loginRequest);
         CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
         CreateResponse createResponse = gameService.createGame(createRequest);
@@ -133,13 +218,25 @@ public class ServiceTests {
         Assertions.assertNull(listResponse.message());
     }
     @Test
+    public void listUnauthorized() throws DataAccessException {
+        LoginRequest loginRequest = new LoginRequest("DefaultUser", "12345");
+        LoginResponse loginResponse = userService.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginResponse.authToken(), "myGame");
+        gameService.createGame(createRequest);
+        userService.logout(new LogoutRequest(loginResponse.authToken()));
+
+        ListRequest listRequest = new ListRequest(loginResponse.authToken());
+        ListResponse listResponse = gameService.listGames(listRequest);
+        Assertions.assertNotNull(listResponse.message());
+    }
+    //clear
+    @Test
     public void clear() throws DataAccessException {
-        userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
-        Assertions.assertNotNull(db.getUser("james"));
+        Assertions.assertNotNull(db.getUser("DefaultUser"));
 
         userService.clear();
 
-        Assertions.assertNull(db.getUser("james"));
+        Assertions.assertNull(db.getUser("DefaultUser"));
 
     }
 }
