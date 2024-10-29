@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class SQLDataAccess implements DataAccess{
 
-    SQLDataAccess () {
-
+    public SQLDataAccess () throws DataAccessException {
+        configureDatabase();
     }
     @Override
     public void createUser(UserData userData) {
@@ -75,6 +75,29 @@ public class SQLDataAccess implements DataAccess{
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
               `json` TEXT DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(username),
+              INDEX(email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  authtokens (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `username` varchar(256) NOT NULL,
+              `authtoken` varchar(256) NOT NULL,
+              `json` TEXT DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(username),
+              INDEX(email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  games (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `gameJson` TEXT DEFAULT NULL,
               PRIMARY KEY (`id`),
               INDEX(username),
               INDEX(email)
