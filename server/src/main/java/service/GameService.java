@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import model.GameData;
 import model.UserData;
 import request.CreateRequest;
@@ -22,7 +23,7 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    public CreateResponse createGame(CreateRequest request) {
+    public CreateResponse createGame(CreateRequest request) throws DataAccessException {
         CreateResponse response;
         if (invalidCreateInput(request)) {
             response = new CreateResponse(null, "Error: bad request");
@@ -39,7 +40,7 @@ public class GameService {
         return request.gameName() == null;
     }
 
-    public JoinResponse joinGame(JoinRequest request) {
+    public JoinResponse joinGame(JoinRequest request) throws DataAccessException {
         // for security, rejecting bad requests/unauthorized users should come before manipulating data
         if (invalidJoinInput(request)) {
             return new JoinResponse("Error: bad request");
@@ -86,7 +87,7 @@ public class GameService {
         return newGameData;
     }
 
-    public ListResponse listGames(ListRequest request) {
+    public ListResponse listGames(ListRequest request) throws DataAccessException {
         ListResponse response;
         ArrayList<GameData> gameList;
         if (dataAccess.getAuth(request.authToken()) == null) {
