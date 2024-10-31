@@ -62,8 +62,10 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        executeUpdate("TRUNCATE TABLE USERS");
+        executeUpdate("TRUNCATE TABLE AUTHTOKENS");
+        executeUpdate("TRUNCATE TABLE GAMES");
     }
 
     @Override

@@ -21,9 +21,9 @@ public class SQLDataaccessTests {
     }
 
     @Test
-    public void addFailure() throws DataAccessException {
+    public void addAlreadyExists() throws DataAccessException {
         dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
-        Assertions.assertThrows(SQLException.class, () -> {
+        Assertions.assertThrows(DataAccessException.class, () -> {
             dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
         });
     }
@@ -36,7 +36,14 @@ public class SQLDataaccessTests {
     }
 
     @Test
-    public void getFailure() throws DataAccessException {
+    public void getUserDoesNotExist() throws DataAccessException {
+        Assertions.assertNull(dataAccess.getUser("jimothy"));
+    }
 
+    @Test
+    public void clearSuccess() throws DataAccessException {
+        dataAccess.createUser(new UserData("shortlived", "pass", "donteraseme@.com"));
+        dataAccess.clear();
+        Assertions.assertNull(dataAccess.getUser("shortlived"));
     }
 }
