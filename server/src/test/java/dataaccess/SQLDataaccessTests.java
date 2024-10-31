@@ -42,12 +42,17 @@ public class SQLDataaccessTests {
     }
 
     @Test
-    public void getUserAuthSuccess() throws DataAccessException {
+    public void getUserByAuthSuccess() throws DataAccessException {
         UserData jamesData = new UserData("james", "pass", "james@james.com");
         AuthData jamesAuth = new AuthData("james", "notASecureToken");
         dataAccess.createUser(jamesData);
         dataAccess.createAuth(jamesAuth);
         Assertions.assertEquals(jamesData, dataAccess.getUserByAuth("notASecureToken"));
+    }
+
+    @Test
+    public void getUserByAuthDoesNotExist() throws DataAccessException {
+        Assertions.assertNull(dataAccess.getUserByAuth("tokenDoesntExist"));
     }
 
     @Test
@@ -60,6 +65,23 @@ public class SQLDataaccessTests {
     @Test
     public void getAuthFail() throws DataAccessException {
         Assertions.assertNull(dataAccess.getAuth("thisAuthDoesntExist"));
+    }
+
+    @Test
+    public void deleteAuthSuccess() throws DataAccessException {
+        AuthData jamesAuth = new AuthData("james", "totallySecureToken");
+        dataAccess.createAuth(jamesAuth);
+        dataAccess.deleteAuth("totallySecureToken");
+        Assertions.assertNull(dataAccess.getAuth("totallySecureToken"));
+    }
+
+    @Disabled
+    @Test
+    public void deleteAuthFailure() throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            dataAccess.deleteAuth("tokenDoesntExist");
+        }
+        );
     }
 
     @Test

@@ -97,18 +97,20 @@ public class SQLDataAccess implements DataAccess{
     }
     @Override
     public void clear() throws DataAccessException {
-        executeUpdate("TRUNCATE TABLE USERS");
-        executeUpdate("TRUNCATE TABLE AUTHTOKENS");
-        executeUpdate("TRUNCATE TABLE GAMES");
+        executeUpdate("TRUNCATE TABLE users");
+        executeUpdate("TRUNCATE TABLE authtokens");
+        executeUpdate("TRUNCATE TABLE games");
     }
 
     @Override
-    public void deleteAuth(String s) {
-
+    public void deleteAuth(String s) throws DataAccessException {
+        var statement = "DELETE FROM authtokens WHERE authtoken = ?";
+        executeUpdate(statement, s);
     }
 
     @Override
     public int createGame(String s) {
+        //var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameJson VALUES (?, ?, ?, ?)";
         return 0;
     }
 
