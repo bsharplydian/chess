@@ -52,6 +52,17 @@ public class SQLDataaccessTests {
     }
 
     @Test
+    public void getAuthSuccess() throws DataAccessException {
+        AuthData jamesAuth = new AuthData("james", "notASecureToken");
+        dataAccess.createAuth(jamesAuth);
+        Assertions.assertEquals(jamesAuth, dataAccess.getAuth("notASecureToken"));
+    }
+
+    @Test
+    public void getAuthFail() throws DataAccessException {
+        Assertions.assertNull(dataAccess.getAuth("thisAuthDoesntExist"));
+    }
+    @Test
     public void clearSuccess() throws DataAccessException {
         dataAccess.createUser(new UserData("shortlived", "pass", "donteraseme@.com"));
         dataAccess.clear();

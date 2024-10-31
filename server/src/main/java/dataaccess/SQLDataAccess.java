@@ -4,6 +4,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -72,10 +73,28 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        var statement = "SELECT username, authtoken FROM authtokens WHERE authtoken=?";
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var rs = ps.executeQuery()) {
+                    if(rs.next()) {
+                        return readAuth(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
         return null;
     }
 
+    private AuthData readAuth(ResultSet rs) throws SQLException {
+        var username = rs.getString(1);
+        var authtoken = rs.getString(2);
+        return new AuthData(username, authtoken);
+    }
     @Override
     public void clear() throws DataAccessException {
         executeUpdate("TRUNCATE TABLE USERS");
