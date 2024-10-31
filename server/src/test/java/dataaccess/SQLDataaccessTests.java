@@ -11,8 +11,25 @@ public class SQLDataaccessTests {
         dataAccess = new SQLDataAccess();
     }
     @Test
-    public void registerSuccess() throws DataAccessException {
+    public void addSuccess() throws DataAccessException {
         dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
         Assertions.assertEquals(dataAccess.getUser("jeff").getClass(), UserData.class);
+    }
+
+    @Test
+    public void addFailure() throws DataAccessException {
+
+    }
+
+    @Test
+    public void getSuccess() throws DataAccessException {
+        UserData jamesData = new UserData("james", "pass", "james@james.com");
+        dataAccess.createUser(jamesData);
+        Assertions.assertEquals(jamesData, dataAccess.getUser("james"));
+    }
+
+    @Test
+    public void getFailure() throws DataAccessException {
+
     }
 }

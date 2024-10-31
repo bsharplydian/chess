@@ -20,7 +20,7 @@ public class SQLDataAccess implements DataAccess{
     public void createUser(UserData userData) throws DataAccessException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try(var conn = DatabaseManager.getConnection()) {
-            try(var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+            try(var ps = conn.prepareStatement(statement)) {
                 String[] params = {userData.username(), userData.password(), userData.email()};
                 for(var i = 0; i < params.length; i++){
                     var param = params[i];
@@ -113,7 +113,6 @@ public class SQLDataAccess implements DataAccess{
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`id`),
               INDEX(username),
               INDEX(email)
@@ -124,7 +123,6 @@ public class SQLDataAccess implements DataAccess{
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(256) NOT NULL,
               `authtoken` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`id`),
               INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -137,8 +135,7 @@ public class SQLDataAccess implements DataAccess{
               `gameName` varchar(256) NOT NULL,
               `gameJson` TEXT DEFAULT NULL,
               PRIMARY KEY (`id`),
-              INDEX(username),
-              INDEX(email)
+              INDEX(gameName)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
