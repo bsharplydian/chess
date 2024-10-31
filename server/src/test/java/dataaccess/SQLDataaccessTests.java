@@ -75,11 +75,10 @@ public class SQLDataaccessTests {
         Assertions.assertNull(dataAccess.getAuth("totallySecureToken"));
     }
 
-    @Disabled
     @Test
     public void deleteAuthFailure() throws DataAccessException {
         Assertions.assertThrows(DataAccessException.class, () -> {
-            dataAccess.deleteAuth("tokenDoesntExist");
+            dataAccess.deleteAuth(null);
         }
         );
     }
