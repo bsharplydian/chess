@@ -1,11 +1,14 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 public class SQLDataaccessTests {
@@ -15,15 +18,20 @@ public class SQLDataaccessTests {
         dataAccess = new SQLDataAccess();
         dataAccess.clear();
     }
+
+    @BeforeEach
+    public void beforeEach() throws DataAccessException {
+        //dataAccess.clear();
+    }
     @Test
-    public void addSuccess() throws DataAccessException {
+    public void addUserSuccess() throws DataAccessException {
         dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
 
         Assertions.assertEquals(dataAccess.getUser("jeff").getClass(), UserData.class);
     }
 
     @Test
-    public void addAlreadyExists() throws DataAccessException {
+    public void addUserAlreadyExists() throws DataAccessException {
         dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
         Assertions.assertThrows(DataAccessException.class, () -> {
             dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));
@@ -31,7 +39,7 @@ public class SQLDataaccessTests {
     }
 
     @Test
-    public void getSuccess() throws DataAccessException {
+    public void getUserSuccess() throws DataAccessException {
         UserData jamesData = new UserData("james", "pass", "james@james.com");
         dataAccess.createUser(jamesData);
         Assertions.assertEquals(jamesData, dataAccess.getUser("james"));
@@ -85,6 +93,18 @@ public class SQLDataaccessTests {
     }
 
     @Test
+    public void getGameSuccess() throws DataAccessException {
+        int id = dataAccess.createGame("myGame1");
+        Assertions.assertEquals("myGame1", dataAccess.getGame(id).gameName());
+
+    }
+
+    @Test
+    public void getGameDoesntExist() throws DataAccessException {
+        Assertions.assertNull(dataAccess.getGame(4204039));
+    }
+
+    @Test
     public void createGameSuccess() throws DataAccessException {
         int id = dataAccess.createGame("myGame");
         Assertions.assertEquals("myGame", dataAccess.getGame(id).gameName());
@@ -92,6 +112,19 @@ public class SQLDataaccessTests {
         int id2 = dataAccess.createGame("game2");
         Assertions.assertEquals("game3", dataAccess.getGame(id3).gameName());
         Assertions.assertEquals("game2", dataAccess.getGame(id2).gameName());
+    }
+
+    @Test
+    public void createGameFailure() throws DataAccessException {
+
+    }
+
+    @Test
+    public void updateGameSuccess() throws DataAccessException {
+        int id = dataAccess.createGame("myGame");
+        GameData newData = new GameData(id, "james", "john", "myGame", new ChessGame());
+        dataAccess.updateGame(id, newData);
+        Assertions.assertEquals("james", dataAccess.getGame(id).whiteUsername());
     }
 
     @Test

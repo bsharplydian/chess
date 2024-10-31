@@ -150,14 +150,22 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public void updateGame(int gameID, GameData gameData) {
+    public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        var gameJson = new Gson().toJson(gameData.game());
+        var statement = "UPDATE games SET whiteUsername=?, blackUsername=?, gameName=?, gameJson=? WHERE id=?";
 
+        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameJson, gameID);
     }
 
     @Override
     public ArrayList<GameData> listGames() {
+        //ArrayList<GameData> games = new ArrayList<>();
         return null;
     }
+
+//    private ArrayList<Integer> getGameIDs() {
+//
+//    }
 
     private final String[] createStatements = {
             """
