@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class SQLDataaccessTests {
     private static DataAccess dataAccess;
@@ -126,6 +127,17 @@ public class SQLDataaccessTests {
         dataAccess.updateGame(id, newData);
         Assertions.assertEquals("james", dataAccess.getGame(id).whiteUsername());
     }
+
+    @Test
+    public void listGamesSuccess() throws DataAccessException {
+        int id = dataAccess.createGame("myGame");
+        int id2 = dataAccess.createGame("game2");
+        int id3 = dataAccess.createGame("game3");
+
+        ArrayList<GameData> gameList = dataAccess.listGames();
+        Assertions.assertEquals("game2", gameList.get(1).gameName());
+    }
+
 
     @Test
     public void clearSuccess() throws DataAccessException {

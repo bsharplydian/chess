@@ -158,14 +158,40 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public ArrayList<GameData> listGames() {
-        //ArrayList<GameData> games = new ArrayList<>();
-        return null;
+    public ArrayList<GameData> listGames() throws DataAccessException{
+        ArrayList<GameData> games = new ArrayList<>();
+        var statement = "SELECT whiteUsername, blackUsername, gameName, gameJson FROM games";
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        games.addLast(readGame(rs));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
+        return games;
     }
 
-//    private ArrayList<Integer> getGameIDs() {
-//
-//    }
+    private ArrayList<Integer> getGameIDs() throws DataAccessException{
+        ArrayList<Integer> gameIDs = new ArrayList<>();
+        var statement = "SELECT id FROM games";
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        gameIDs.addLast(rs.getInt(1));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
+
+        return gameIDs;
+    }
 
     private final String[] createStatements = {
             """
