@@ -1,5 +1,7 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -112,14 +114,39 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public int createGame(String s) {
-        //var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameJson VALUES (?, ?, ?, ?)";
-        return 0;
+    public int createGame(String s) throws DataAccessException {
+        var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameJson) VALUES (?, ?, ?, ?)";
+        ChessGame game = new ChessGame();
+
+        return executeUpdate(statement, null, null, s, new Gson().toJson(game));
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
+        var statement = "SELECT whiteUsername, blackUsername, gameName, gameJson FROM games WHERE id=?";
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, String.valueOf(gameID));
+                try (var rs = ps.executeQuery()) {
+                    if(rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
         return null;
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException{
+        var id = rs.getRow();
+        var whiteUsername = rs.getString(1);
+        var blackUsername = rs.getString(2);
+        var gameName = rs.getString(3);
+        var gameJson = rs.getString(4);
+        ChessGame chessGame = new Gson().fromJson(gameJson, ChessGame.class);
+        return new GameData(id, whiteUsername, blackUsername, gameName, chessGame);
     }
 
     @Override

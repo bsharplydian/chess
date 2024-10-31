@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,16 @@ public class SQLDataaccessTests {
             dataAccess.deleteAuth(null);
         }
         );
+    }
+
+    @Test
+    public void createGameSuccess() throws DataAccessException {
+        int id = dataAccess.createGame("myGame");
+        Assertions.assertEquals("myGame", dataAccess.getGame(id).gameName());
+        int id3 = dataAccess.createGame("game3");
+        int id2 = dataAccess.createGame("game2");
+        Assertions.assertEquals("game3", dataAccess.getGame(id3).gameName());
+        Assertions.assertEquals("game2", dataAccess.getGame(id2).gameName());
     }
 
     @Test
