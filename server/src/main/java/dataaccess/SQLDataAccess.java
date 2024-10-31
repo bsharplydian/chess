@@ -49,7 +49,7 @@ public class SQLDataAccess implements DataAccess{
 
     @Override
     public UserData getUserByAuth(String authToken) throws DataAccessException{
-        var statement = "SELECT username, password, email FROM users WHERE authtoken=?";
+        var statement = "SELECT users.username, password, email FROM users JOIN authtokens WHERE authtoken=?";
         try(var conn = DatabaseManager.getConnection()) {
             try(var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);

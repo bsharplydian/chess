@@ -41,7 +41,6 @@ public class SQLDataaccessTests {
         Assertions.assertNull(dataAccess.getUser("jimothy"));
     }
 
-    @Disabled
     @Test
     public void getUserAuthSuccess() throws DataAccessException {
         UserData jamesData = new UserData("james", "pass", "james@james.com");
@@ -62,6 +61,7 @@ public class SQLDataaccessTests {
     public void getAuthFail() throws DataAccessException {
         Assertions.assertNull(dataAccess.getAuth("thisAuthDoesntExist"));
     }
+
     @Test
     public void clearSuccess() throws DataAccessException {
         dataAccess.createUser(new UserData("shortlived", "pass", "donteraseme@.com"));
