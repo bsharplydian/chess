@@ -47,13 +47,28 @@ public class SQLDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData getUserByAuth(String authToken) {
+    public UserData getUserByAuth(String authToken) throws DataAccessException{
+        var statement = "SELECT username, password, email FROM users WHERE authtoken=?";
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var rs = ps.executeQuery()) {
+                    if(rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
         return null;
     }
 
-    @Override
-    public void createAuth(AuthData auth) {
 
+    @Override
+    public void createAuth(AuthData auth) throws DataAccessException {
+        var statement = "INSERT INTO authtokens (username, authtoken) VALUES (?, ?)";
+        executeUpdate(statement, auth.username(), auth.authToken());
     }
 
     @Override

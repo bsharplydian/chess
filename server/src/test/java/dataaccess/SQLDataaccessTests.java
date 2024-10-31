@@ -1,5 +1,6 @@
 package dataaccess;
 
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,16 @@ public class SQLDataaccessTests {
     @Test
     public void getUserDoesNotExist() throws DataAccessException {
         Assertions.assertNull(dataAccess.getUser("jimothy"));
+    }
+
+    @Disabled
+    @Test
+    public void getUserAuthSuccess() throws DataAccessException {
+        UserData jamesData = new UserData("james", "pass", "james@james.com");
+        AuthData jamesAuth = new AuthData("james", "notASecureToken");
+        dataAccess.createUser(jamesData);
+        dataAccess.createAuth(jamesAuth);
+        Assertions.assertEquals(jamesData, dataAccess.getUserByAuth("notASecureToken"));
     }
 
     @Test
