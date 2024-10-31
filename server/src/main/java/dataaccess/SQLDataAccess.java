@@ -19,22 +19,7 @@ public class SQLDataAccess implements DataAccess{
     @Override
     public void createUser(UserData userData) throws DataAccessException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        try(var conn = DatabaseManager.getConnection()) {
-            try(var ps = conn.prepareStatement(statement)) {
-                String[] params = {userData.username(), userData.password(), userData.email()};
-                for(var i = 0; i < params.length; i++){
-                    var param = params[i];
-                    if(param instanceof String p) {
-                        ps.setString(i+1, p);
-                    } else if (param == null) {
-                        ps.setNull(i+1, NULL);
-                    }
-                }
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
-        }
+        executeUpdate(statement, userData.username(), userData.password(), userData.email());
     }
 
     @Override
@@ -110,7 +95,7 @@ public class SQLDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS  users (
               `id` int NOT NULL AUTO_INCREMENT,
-              `username` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL UNIQUE,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
               PRIMARY KEY (`id`),
@@ -121,7 +106,7 @@ public class SQLDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS  authtokens (
               `id` int NOT NULL AUTO_INCREMENT,
-              `username` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL UNIQUE,
               `authtoken` varchar(256) NOT NULL,
               PRIMARY KEY (`id`),
               INDEX(username)
@@ -151,5 +136,31 @@ public class SQLDataAccess implements DataAccess{
         } catch (SQLException ex) {
             // modify return value of object to contain the given message
         }
+    }
+
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try(var conn = DatabaseManager.getConnection()) {
+            try(var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for(var i = 0; i < params.length; i++){
+                    var param = params[i];
+                    if(param instanceof String p) {
+                        ps.setString(i+1, p);
+                    } else if(param instanceof Integer p) {
+                        ps.setInt(i+1, p);
+                    } else if (param == null) {
+                        ps.setNull(i+1, NULL);
+                    }
+                }
+                ps.executeUpdate();
+                var rs = ps.getGeneratedKeys();
+                if(rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+        }
+
     }
 }
