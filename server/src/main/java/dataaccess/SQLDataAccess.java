@@ -16,8 +16,12 @@ import static java.sql.Types.NULL;
 
 public class SQLDataAccess implements DataAccess{
 
-    public SQLDataAccess () throws DataAccessException {
-        configureDatabase();
+    public SQLDataAccess () {
+        try {
+            configureDatabase();
+        } catch (DataAccessException e) {
+
+        }
     }
     @Override
     public void createUser(UserData userData) throws DataAccessException{
@@ -51,12 +55,13 @@ public class SQLDataAccess implements DataAccess{
 
     @Override
     public UserData getUserByAuth(String authToken) throws DataAccessException{
-        var statement = "SELECT users.username, password, email FROM users JOIN authtokens WHERE authtoken=?";
+        var statement = "SELECT users.username, password, email FROM users JOIN authtokens ON users.username=authtokens.username WHERE authtoken=?";
         try(var conn = DatabaseManager.getConnection()) {
             try(var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (var rs = ps.executeQuery()) {
                     if(rs.next()) {
+                        var username = rs.getString(1);
                         return readUser(rs);
                     }
                 }
@@ -117,8 +122,8 @@ public class SQLDataAccess implements DataAccess{
     public int createGame(String s) throws DataAccessException {
         var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameJson) VALUES (?, ?, ?, ?)";
         ChessGame game = new ChessGame();
-
-        return executeUpdate(statement, null, null, s, new Gson().toJson(game));
+        int id = executeUpdate(statement, null, null, s, new Gson().toJson(game));
+        return id;
     }
 
     @Override
@@ -129,7 +134,7 @@ public class SQLDataAccess implements DataAccess{
                 ps.setString(1, String.valueOf(gameID));
                 try (var rs = ps.executeQuery()) {
                     if(rs.next()) {
-                        return readGame(rs);
+                        return readGame(gameID, rs);
                     }
                 }
             }
@@ -139,14 +144,13 @@ public class SQLDataAccess implements DataAccess{
         return null;
     }
 
-    private GameData readGame(ResultSet rs) throws SQLException{
-        var id = rs.getRow();
+    private GameData readGame(int gameID, ResultSet rs) throws SQLException{
         var whiteUsername = rs.getString(1);
         var blackUsername = rs.getString(2);
         var gameName = rs.getString(3);
         var gameJson = rs.getString(4);
         ChessGame chessGame = new Gson().fromJson(gameJson, ChessGame.class);
-        return new GameData(id, whiteUsername, blackUsername, gameName, chessGame);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, chessGame);
     }
 
     @Override
@@ -165,7 +169,7 @@ public class SQLDataAccess implements DataAccess{
             try(var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        games.addLast(readGame(rs));
+                        games.addLast(readGame(rs.getRow(), rs));
                     }
                 }
             }
@@ -173,24 +177,6 @@ public class SQLDataAccess implements DataAccess{
             throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
         }
         return games;
-    }
-
-    private ArrayList<Integer> getGameIDs() throws DataAccessException{
-        ArrayList<Integer> gameIDs = new ArrayList<>();
-        var statement = "SELECT id FROM games";
-        try(var conn = DatabaseManager.getConnection()) {
-            try(var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        gameIDs.addLast(rs.getInt(1));
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
-        }
-
-        return gameIDs;
     }
 
     private final String[] createStatements = {
@@ -208,8 +194,8 @@ public class SQLDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS  authtokens (
               `id` int NOT NULL AUTO_INCREMENT,
-              `username` varchar(256) NOT NULL UNIQUE,
-              `authtoken` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              `authtoken` varchar(256) NOT NULL UNIQUE,
               PRIMARY KEY (`id`),
               INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

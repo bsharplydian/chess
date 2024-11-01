@@ -22,7 +22,7 @@ public class SQLDataaccessTests {
 
     @BeforeEach
     public void beforeEach() throws DataAccessException {
-        //dataAccess.clear();
+        dataAccess.clear();
     }
     @Test
     public void addUserSuccess() throws DataAccessException {
@@ -30,7 +30,6 @@ public class SQLDataaccessTests {
 
         Assertions.assertEquals(dataAccess.getUser("jeff").getClass(), UserData.class);
     }
-
     @Test
     public void addUserAlreadyExists() throws DataAccessException {
         dataAccess.createUser(new UserData("jeff", "password", "jeff@james.com"));

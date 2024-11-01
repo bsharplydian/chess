@@ -3,6 +3,7 @@ package server;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SQLDataAccess;
 import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
@@ -10,8 +11,9 @@ import service.UserService;
 import service.GameService;
 import spark.*;
 
+
 public class Server {
-    private final DataAccess dataAccess = new MemoryDataAccess();
+    private final DataAccess dataAccess = new SQLDataAccess();
     private final UserService userService = new UserService(dataAccess);
     private final UserHandler userHandler = new UserHandler(userService);
     private final GameService gameService = new GameService(dataAccess);
