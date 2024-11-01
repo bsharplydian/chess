@@ -6,6 +6,7 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
@@ -42,7 +43,10 @@ public class SQLDataaccessTests {
     public void getUserSuccess() throws DataAccessException {
         UserData jamesData = new UserData("james", "pass", "james@james.com");
         dataAccess.createUser(jamesData);
-        Assertions.assertEquals(jamesData, dataAccess.getUser("james"));
+        UserData getJames = dataAccess.getUser("james");
+        Assertions.assertEquals(jamesData.username(), getJames.username());
+        Assertions.assertTrue(BCrypt.checkpw(jamesData.password(), getJames.password()));
+        Assertions.assertEquals(jamesData.email(), getJames.email());
     }
 
     @Test
@@ -56,7 +60,10 @@ public class SQLDataaccessTests {
         AuthData jamesAuth = new AuthData("james", "notASecureToken");
         dataAccess.createUser(jamesData);
         dataAccess.createAuth(jamesAuth);
-        Assertions.assertEquals(jamesData, dataAccess.getUserByAuth("notASecureToken"));
+        UserData getJames = dataAccess.getUserByAuth("notASecureToken");
+        Assertions.assertEquals(jamesData.username(), getJames.username());
+        Assertions.assertTrue(BCrypt.checkpw(jamesData.password(), getJames.password()));
+        Assertions.assertEquals(jamesData.email(), getJames.email());
     }
 
     @Test

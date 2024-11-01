@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
 import java.sql.ResultSet;
@@ -26,7 +27,8 @@ public class SQLDataAccess implements DataAccess{
     @Override
     public void createUser(UserData userData) throws DataAccessException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        executeUpdate(statement, userData.username(), userData.password(), userData.email());
+        String hashedPass = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
+        executeUpdate(statement, userData.username(), hashedPass, userData.email());
     }
 
     @Override
