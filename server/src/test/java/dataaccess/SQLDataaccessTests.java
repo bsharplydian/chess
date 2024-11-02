@@ -156,8 +156,13 @@ public class SQLDataaccessTests {
     }
 
     @Test
-    public void listGamesFailure() throws DataAccessException {
-        dataAccess.listGames();
+    public void listGamesEmpty() throws DataAccessException {
+        //this simulates a scenario where the data of the games is lost and cannot be retrieved
+        int id = dataAccess.createGame("myGame");
+        int id2 = dataAccess.createGame("game2");
+        int id3 = dataAccess.createGame("game3");
+        dataAccess.clear();
+        Assertions.assertEquals(0, dataAccess.listGames().size());
     }
 
     @Test
