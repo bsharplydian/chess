@@ -23,7 +23,7 @@ public class UserHandler {
         this.userService = userService;
     }
 
-    public Object handle(Request req, Response res, UserRequestType userRequestType) throws DataAccessException {
+    public Object handle(Request req, Response res, UserRequestType userRequestType){
         //validate auth token if needed for operation
         //deserialize JSON request to java request object
         //call UserService.someMethod & give it java request object
@@ -49,7 +49,7 @@ public class UserHandler {
         try {
             registerResponse = userService.register(registerRequest);
         } catch (DataAccessException e) {
-            return new Gson().toJson(e.getMessage());
+            registerResponse = new RegisterResponse(null, null, e.getMessage());
         }
         if (Objects.equals(registerResponse.message(), "Error: already taken")) {
             res.status(403);
@@ -68,8 +68,9 @@ public class UserHandler {
         try {
             loginResponse = userService.login(loginRequest);
         } catch (DataAccessException e) {
-            return new Gson().toJson(e.getMessage());
+            loginResponse = new LoginResponse(null, null, e.getMessage());
         }
+
         if (Objects.equals(loginResponse.message(), "Error: unauthorized")) {
             res.status(401);
         } else if (loginResponse.message() != null) {
@@ -85,8 +86,9 @@ public class UserHandler {
         try {
             logoutResponse = userService.logout(logoutRequest);
         } catch (DataAccessException e) {
-            return new Gson().toJson(e.getMessage());
+            logoutResponse = new LogoutResponse(e.getMessage());
         }
+
         if (Objects.equals(logoutResponse.message(), "Error: unauthorized")) {
             res.status(401);
         } else if (logoutResponse.message() != null) {

@@ -22,7 +22,7 @@ public class GameHandler {
         this.gameService = gameService;
     }
 
-    public Object handle(Request req, Response res, GameRequestType gameRequestType) throws DataAccessException {
+    public Object handle(Request req, Response res, GameRequestType gameRequestType) {
         return switch (gameRequestType) {
             case CREATE -> createGame(req, res);
             case LIST -> listGames(req, res);
@@ -56,8 +56,9 @@ public class GameHandler {
         try {
             createResponse = gameService.createGame(createRequest);
         } catch (Exception e) {
-            return new Gson().toJson(e.getMessage());
+            createResponse = new CreateResponse(null, e.getMessage());
         }
+
         if (Objects.equals(createResponse.message(), "Error: unauthorized")) {
             res.status(401);
         } else if (createResponse.message() != null) {
@@ -73,8 +74,9 @@ public class GameHandler {
         try {
             joinResponse = gameService.joinGame(joinRequest);
         } catch (Exception e) {
-            return new Gson().toJson(e.getMessage());
+            joinResponse = new JoinResponse(e.getMessage());
         }
+
         if (Objects.equals(joinResponse.message(), "Error: bad request")) {
             res.status(400);
         } else if (Objects.equals(joinResponse.message(), "Error: unauthorized")) {
@@ -94,8 +96,9 @@ public class GameHandler {
         try {
             listResponse = gameService.listGames(listRequest);
         } catch (Exception e) {
-            return new Gson().toJson(e.getMessage());
+            listResponse = new ListResponse(null, e.getMessage());
         }
+
         if (Objects.equals(listResponse.message(), "Error: unauthorized")) {
             res.status(401);
         } else if (listResponse.message() != null) {

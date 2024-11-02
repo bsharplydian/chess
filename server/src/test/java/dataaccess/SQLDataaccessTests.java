@@ -121,9 +121,12 @@ public class SQLDataaccessTests {
         Assertions.assertEquals("game2", dataAccess.getGame(id2).gameName());
     }
 
+
     @Test
     public void createGameFailure() throws DataAccessException {
-
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            dataAccess.createGame(null);
+        });
     }
 
     @Test
@@ -132,6 +135,14 @@ public class SQLDataaccessTests {
         GameData newData = new GameData(id, "james", "john", "myGame", new ChessGame());
         dataAccess.updateGame(id, newData);
         Assertions.assertEquals("james", dataAccess.getGame(id).whiteUsername());
+    }
+
+    @Disabled
+    @Test
+    public void updateGameFailure() throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            dataAccess.updateGame(2, null);
+        });
     }
 
     @Test
@@ -144,6 +155,10 @@ public class SQLDataaccessTests {
         Assertions.assertEquals("game2", gameList.get(1).gameName());
     }
 
+    @Test
+    public void listGamesFailure() throws DataAccessException {
+        dataAccess.listGames();
+    }
 
     @Test
     public void clearSuccess() throws DataAccessException {

@@ -15,14 +15,10 @@ import java.util.ArrayList;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
-public class SQLDataAccess implements DataAccess{
+public class SQLDataAccess implements DataAccess {
 
-    public SQLDataAccess () {
-        try {
-            configureDatabase();
-        } catch (DataAccessException e) {
-
-        }
+    public SQLDataAccess () throws DataAccessException {
+        configureDatabase();
     }
     @Override
     public void createUser(UserData userData) throws DataAccessException{
@@ -157,6 +153,9 @@ public class SQLDataAccess implements DataAccess{
 
     @Override
     public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        if(gameData == null) {
+            throw new DataAccessException("game data cannot be null");
+        }
         var gameJson = new Gson().toJson(gameData.game());
         var statement = "UPDATE games SET whiteUsername=?, blackUsername=?, gameName=?, gameJson=? WHERE id=?";
 
@@ -225,6 +224,7 @@ public class SQLDataAccess implements DataAccess{
             }
         } catch (SQLException ex) {
             // modify return value of object to contain the given message
+            throw new DataAccessException(ex.getMessage());
         }
     }
 

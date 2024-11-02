@@ -2,25 +2,27 @@ package service;
 
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SQLDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
+import org.mindrot.jbcrypt.BCrypt;
 import request.*;
 import response.*;
 
 
 public class ServiceTests {
-    private static MemoryDataAccess db;
+    private static SQLDataAccess db;
     private static UserService userService;
     private static GameService gameService;
     private static UserData newUser;
     private static GameData newGame;
 
     @BeforeAll
-    public static void init() {
-        db = new MemoryDataAccess();
+    public static void init() throws DataAccessException {
+        db = new SQLDataAccess();
         userService = new UserService(db);
         gameService = new GameService(db);
         newUser = new UserData("james", "12345", "james@mynameisjames.com");
@@ -37,7 +39,9 @@ public class ServiceTests {
     public void registerSuccess() throws DataAccessException {
         var registerRes = userService.register(new RegisterRequest("james", "12345", "james@mynameisjames.com"));
 
-        Assertions.assertEquals(newUser, db.getUser("james"));
+        Assertions.assertEquals(newUser.username(), db.getUser("james").username());
+        Assertions.assertTrue(BCrypt.checkpw(newUser.password(), db.getUser("james").password()));
+        Assertions.assertEquals(newUser.email(), db.getUser("james").email());
         Assertions.assertNotNull(db.getAuth(registerRes.authToken()));
     }
     @Test

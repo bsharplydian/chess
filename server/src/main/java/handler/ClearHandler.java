@@ -17,8 +17,12 @@ public class ClearHandler {
         this.userService = userService;
     }
 
-    public Object handle(Request req, Response res) throws DataAccessException {
-        userService.clear();
+    public Object handle(Request req, Response res){
+        try {
+            userService.clear();
+        } catch (Exception e) {
+            return new Gson().toJson(e.getMessage());
+        }
         return "{}";
     }
 }

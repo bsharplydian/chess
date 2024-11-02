@@ -53,7 +53,6 @@ public class UserService {
             dataAccess.createAuth(auth);
             response = new LoginResponse(request.username(), token, null);
         }
-
         return response;
     }
 
