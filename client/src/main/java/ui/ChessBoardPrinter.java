@@ -84,7 +84,7 @@ public class ChessBoardPrinter {
         setBlack(out);
     }
     private static void drawChessBoard(PrintStream out, ChessBoard board) {
-
+        drawColumnLetters(out);
         for(int row = BOARD_SIZE_IN_SQUARES - 1; row >= 0; --row) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(SET_TEXT_COLOR_BLACK);
@@ -99,12 +99,37 @@ public class ChessBoardPrinter {
             }
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.printf(" %d ", row+1);
-            if(row > 0) {
-                setBlank(out);
-                out.print("\n");
-            }
+            setBlank(out);
+            out.print("\n");
 
         }
+        drawColumnLetters(out);
+    }
+    private static void drawColumnLetters(PrintStream out) {
+        String output;
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(EMPTY);
+        for(int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
+            output = convertNumToLetter(i);
+            out.print(output);
+        }
+        out.print(EMPTY);
+        out.print(RESET_BG_COLOR);
+        out.print("\n");
+    }
+    private static String convertNumToLetter(int i) {
+        return switch(i) {
+            case 0 -> " a ";
+            case 1 -> " b ";
+            case 2 -> " c ";
+            case 3 -> " d ";
+            case 4 -> " e ";
+            case 5 -> " f ";
+            case 6 -> " g ";
+            case 7 -> " h ";
+            default -> EMPTY;
+        };
     }
     private static void drawSquare(PrintStream out, ChessPiece piece) {
         String output;
