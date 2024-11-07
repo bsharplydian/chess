@@ -6,8 +6,6 @@ import chess.ChessPiece;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Random;
 
 import static ui.EscapeSequences.*;
 
@@ -31,15 +29,10 @@ public class ChessBoardPrinter {
     private static final String PawnB = " p ";
 
 
-    private static Random rand = new Random();
-
-
     public static void displayBoard(ChessBoard board) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
-
-        //drawHeaders(out);
 
         drawChessBoard(out, board);
         out.print("\n");
@@ -94,6 +87,7 @@ public class ChessBoardPrinter {
         }
         drawColumnLettersBlack(out);
     }
+
     private static void drawColumnLetters(PrintStream out) {
         String output;
         out.print(SET_TEXT_COLOR_BLACK);
@@ -186,14 +180,6 @@ public class ChessBoardPrinter {
     private static void setBlank(PrintStream out) {
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(RESET_BG_COLOR);
-    }
-    private static void printPlayer(PrintStream out, String player) {
-        out.print(SET_BG_COLOR_WHITE);
-        out.print(SET_TEXT_COLOR_BLACK);
-
-        out.print(player);
-
-        setWhite(out);
     }
 
 }
