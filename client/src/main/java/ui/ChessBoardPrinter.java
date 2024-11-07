@@ -84,8 +84,11 @@ public class ChessBoardPrinter {
         setBlack(out);
     }
     private static void drawChessBoard(PrintStream out, ChessBoard board) {
-        setBlank(out);
+
         for(int row = BOARD_SIZE_IN_SQUARES - 1; row >= 0; --row) {
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(SET_TEXT_COLOR_BLACK);
+            out.printf(" %d ", row+1);
             for(int col = 0; col < BOARD_SIZE_IN_SQUARES; ++col) {
                 if((row + col)%2 == 1){
                     out.print(SET_BG_COLOR_WHITE);
@@ -94,10 +97,13 @@ public class ChessBoardPrinter {
                 }
                 drawSquare(out, board.getSquares()[row][col]);
             }
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.printf(" %d ", row+1);
             if(row > 0) {
                 setBlank(out);
                 out.print("\n");
             }
+
         }
     }
     private static void drawSquare(PrintStream out, ChessPiece piece) {
