@@ -5,6 +5,6 @@ import chess.ChessBoard;
 public class UI {
 
     public void displayBoard(ChessBoard board) {
-        ChessBoardPrinter.displayBoard();
+        ChessBoardPrinter.displayBoard(board);
     }
 }
