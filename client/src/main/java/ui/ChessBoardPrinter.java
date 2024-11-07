@@ -15,6 +15,7 @@ public class ChessBoardPrinter {
 
     // Padded characters.
     private static final String EMPTY = "   ";
+    private static final String EMPTYWIDE = " \u2003 ";
     private static final String KingW = " K ";
     private static final String QueenW = " Q ";
     private static final String BishopW = " B ";

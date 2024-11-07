@@ -16,6 +16,11 @@ public class REPL {
         while(!result.equals("quit")) {
             System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
             String line = scanner.nextLine();
+            if(Objects.equals(line, "display")) {
+                ChessBoard testBoard = new ChessBoard();
+                testBoard.resetBoard();
+                displayBoard(testBoard);
+            }
             if(Objects.equals(line, "quit")) {
                 result = "quit";
             }
