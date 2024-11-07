@@ -44,7 +44,8 @@ public class ChessBoardPrinter {
         //drawHeaders(out);
 
         drawChessBoard(out, board);
-//        drawChessBoardBlack(out, board);
+        out.print("\n");
+        drawChessBoardBlack(out, board);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
@@ -105,12 +106,47 @@ public class ChessBoardPrinter {
         }
         drawColumnLetters(out);
     }
+    private static void drawChessBoardBlack(PrintStream out, ChessBoard board) {
+        drawColumnLettersBlack(out);
+        for(int row = 0; row < BOARD_SIZE_IN_SQUARES; ++row) {
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(SET_TEXT_COLOR_BLACK);
+            out.printf(" %d ", row+1);
+            for(int col = BOARD_SIZE_IN_SQUARES-1; col >= 0; --col) {
+                if((row + col)%2 == 1){
+                    out.print(SET_BG_COLOR_WHITE);
+                } else {
+                    out.print(SET_BG_COLOR_BLUE);
+                }
+                drawSquare(out, board.getSquares()[row][col]);
+            }
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.printf(" %d ", row+1);
+            setBlank(out);
+            out.print("\n");
+
+        }
+        drawColumnLettersBlack(out);
+    }
     private static void drawColumnLetters(PrintStream out) {
         String output;
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(EMPTY);
         for(int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
+            output = convertNumToLetter(i);
+            out.print(output);
+        }
+        out.print(EMPTY);
+        out.print(RESET_BG_COLOR);
+        out.print("\n");
+    }
+    private static void drawColumnLettersBlack(PrintStream out) {
+        String output;
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(EMPTY);
+        for(int i = BOARD_SIZE_IN_SQUARES-1; i >=0; i--) {
             output = convertNumToLetter(i);
             out.print(output);
         }
@@ -156,42 +192,6 @@ public class ChessBoardPrinter {
                 };
             }
             out.print(output);
-        }
-    }
-    private static void drawChessBoardBlack(PrintStream out, ChessBoard board) {
-        for(int boardRow = BOARD_SIZE_IN_SQUARES-1; boardRow > 0; --boardRow) {
-            drawRowBackward(out, board.getSquares()[boardRow]);
-            if(boardRow > 1) {
-                out.print("\n");
-                setBlack(out);
-            }
-        }
-    }
-    private static void drawRow(PrintStream out, ChessPiece[] pieces) {
-        Boolean blackChecker = true;
-        for(var piece : pieces) {
-            if(piece == null) {
-                out.print(EMPTY);
-            } else {
-                setBlue(out);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(piece);
-                setBlack(out);
-            }
-        }
-        setBlank(out);
-
-    }
-    private static void drawRowBackward(PrintStream out, ChessPiece[] pieces) {
-        for(int i = pieces.length - 1; i > 0; i++) {
-            if(pieces[i] == null) {
-                out.print(EMPTY);
-            } else {
-                setBlue(out);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(pieces[i]);
-                setBlack(out);
-            }
         }
     }
 //    private static void drawRowOfSquares(PrintStream out) {
