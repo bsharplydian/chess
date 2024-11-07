@@ -1,9 +1,12 @@
 package ui;
 
 import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Random;
 
 import static ui.EscapeSequences.*;
@@ -41,6 +44,7 @@ public class ChessBoardPrinter {
         //drawHeaders(out);
 
         drawChessBoard(out, board);
+//        drawChessBoardBlack(out, board);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
@@ -79,28 +83,82 @@ public class ChessBoardPrinter {
 
         setBlack(out);
     }
-
     private static void drawChessBoard(PrintStream out, ChessBoard board) {
-
-        for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
-            drawRow(out, board, boardRow);
-
-            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
-                // Draw horizontal row separator.
-                //drawHorizontalLine(out);
+        setBlank(out);
+        for(int row = BOARD_SIZE_IN_SQUARES - 1; row >= 0; --row) {
+            for(int col = 0; col < BOARD_SIZE_IN_SQUARES; ++col) {
+                if((row + col)%2 == 1){
+                    out.print(SET_BG_COLOR_WHITE);
+                } else {
+                    out.print(SET_BG_COLOR_BLUE);
+                }
+                drawSquare(out, board.getSquares()[row][col]);
+            }
+            if(row > 0) {
+                setBlank(out);
+                out.print("\n");
+            }
+        }
+    }
+    private static void drawSquare(PrintStream out, ChessPiece piece) {
+        String output;
+        if(piece == null) {
+            out.print(EMPTY);
+        } else {
+            if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                output = switch (piece.getPieceType()) {
+                    case KING -> KingW;
+                    case QUEEN -> QueenW;
+                    case BISHOP -> BishopW;
+                    case KNIGHT -> KnightW;
+                    case ROOK -> RookW;
+                    case PAWN -> PawnW;
+                };
+            } else {
+                output = switch (piece.getPieceType()) {
+                    case KING -> KingB;
+                    case QUEEN -> QueenB;
+                    case BISHOP -> BishopB;
+                    case KNIGHT -> KnightB;
+                    case ROOK -> RookB;
+                    case PAWN -> PawnB;
+                };
+            }
+            out.print(output);
+        }
+    }
+    private static void drawChessBoardBlack(PrintStream out, ChessBoard board) {
+        for(int boardRow = BOARD_SIZE_IN_SQUARES-1; boardRow > 0; --boardRow) {
+            drawRowBackward(out, board.getSquares()[boardRow]);
+            if(boardRow > 1) {
                 out.print("\n");
                 setBlack(out);
             }
         }
     }
-    private static void drawRow(PrintStream out, ChessBoard board, int row) {
-        for(var piece : board.getSquares()[row]) {
+    private static void drawRow(PrintStream out, ChessPiece[] pieces) {
+        Boolean blackChecker = true;
+        for(var piece : pieces) {
             if(piece == null) {
                 out.print(EMPTY);
             } else {
                 setBlue(out);
                 out.print(SET_TEXT_COLOR_BLACK);
                 out.print(piece);
+                setBlack(out);
+            }
+        }
+        setBlank(out);
+
+    }
+    private static void drawRowBackward(PrintStream out, ChessPiece[] pieces) {
+        for(int i = pieces.length - 1; i > 0; i++) {
+            if(pieces[i] == null) {
+                out.print(EMPTY);
+            } else {
+                setBlue(out);
+                out.print(SET_TEXT_COLOR_BLACK);
+                out.print(pieces[i]);
                 setBlack(out);
             }
         }
@@ -170,7 +228,10 @@ public class ChessBoardPrinter {
         out.print(SET_TEXT_COLOR_BLUE);
     }
 
-
+    private static void setBlank(PrintStream out) {
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(RESET_BG_COLOR);
+    }
     private static void printPlayer(PrintStream out, String player) {
         out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_BLACK);
