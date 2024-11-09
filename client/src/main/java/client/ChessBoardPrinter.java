@@ -41,8 +41,6 @@ public class ChessBoardPrinter {
         out.print("\n");
         drawChessBoardBlack(out, board);
 
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_WHITE);
         return os.toString();
     }
 

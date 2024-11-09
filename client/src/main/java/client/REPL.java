@@ -20,7 +20,7 @@ public class REPL {
         System.out.print("Welcome to chess! HELP to start");
 
         while(!result.equals("quit")) {
-            System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
+            promptUser();
             String line = scanner.nextLine();
             try {
                 result = client.eval(line);
@@ -28,13 +28,13 @@ public class REPL {
             } catch (Throwable e) {
                 System.out.print(e.toString());
             }
-
-            System.out.print(RESET_TEXT_COLOR);
-            System.out.print("congrats, you typed \"" + line + "\"");
         }
         System.out.println();
     }
     public void displayBoard(ChessBoard board) {
         ChessBoardPrinter.displayBoard(board);
+    }
+    private void promptUser() {
+        System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
     }
 }

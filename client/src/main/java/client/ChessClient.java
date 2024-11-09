@@ -21,7 +21,11 @@ public class ChessClient {
         return switch(cmd) {
             case "display" -> ChessBoardPrinter.displayBoard(new ChessBoard());
             case "quit" -> "quit";
-            default -> throw new IllegalStateException("Unexpected value: " + cmd);
+            default -> help();
         };
+    }
+
+    public String help() {
+        return "this text should appear when the user selects help";
     }
 }
