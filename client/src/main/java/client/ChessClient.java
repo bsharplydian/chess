@@ -33,27 +33,27 @@ public class ChessClient {
     }
 
     public String help() {
-        return "this text should appear when the user selects help";
+        return "help not implemented";
     }
     public String login(String... params) {
-        return "";
+        return "login not implemented";
     }
     public String logout() {
-        return "";
+        return "logout not implemented";
     }
     public String register(String... params) {
-        return "";
+        return "register not implemented";
     }
     public String createGame(String... params) {
-        return "";
+        return "create not implemented";
     }
     public String listGames() {
-        return "";
+        return "list not implemented";
     }
     public String playGame(String... params) {
-        return "";
+        return "play not implemented";
     }
     public String observeGame(String... params) {
-        return "";
+        return "observe not implemented";
     }
 }
