@@ -1,7 +1,10 @@
 package serverfacade;
 
 import com.google.gson.Gson;
+import model.AuthData;
 import model.UserData;
+import request.*;
+import response.RegisterResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +17,14 @@ public class ServerFacade {
     public ServerFacade(String url) {
         serverUrl = url;
     }
-    public UserData addUser(UserData userData) throws Exception {
+    public RegisterResponse addUser(RegisterRequest registerRequest) throws Exception {
         var path = "/user";
-        return this.makeRequest("POST", path, userData, UserData.class);
+        return this.makeRequest("POST", path, registerRequest, RegisterResponse.class);
+    }
+
+    public AuthData login(LoginRequest loginRequest) throws Exception {
+        var path = "/session";
+        return this.makeRequest("POST", path, loginRequest, AuthData.class);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws Exception {

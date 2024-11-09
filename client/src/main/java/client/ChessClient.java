@@ -2,7 +2,10 @@ package client;
 
 import chess.ChessBoard;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.UserData;
+import request.*;
+import response.*;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
@@ -59,9 +62,9 @@ public class ChessClient {
     public String register(String... params) throws Exception {
         if(params.length == 3) {
             loginStatus = LoginStatus.SIGNEDIN;
-            UserData newUser = new UserData(params[0], params[1], params[2]);
-            UserData responseData = server.addUser(newUser);
-            return "registered as " + newUser.username() + new Gson().toJson(responseData);
+            RegisterRequest newUser = new RegisterRequest(params[0], params[1], params[2]);
+            RegisterResponse responseData = server.addUser(newUser);
+            return "registered as " + newUser.username() + " " + new Gson().toJson(responseData);
         }
         return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
