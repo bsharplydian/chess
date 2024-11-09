@@ -20,20 +20,24 @@ public class ChessClient {
     }
 
     public String eval(String input) {
-        var tokens = input.toLowerCase().split(" ");
-        var cmd = (tokens.length > 0) ? tokens[0] : "help"; //default to help command if no input
-        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-        return switch(cmd) {
-            case "login" -> login(params);
-            case "logout" -> logout();
-            case "register" -> register(params);
-            case "create" -> createGame(params);
-            case "list" -> listGames();
-            case "play" -> playGame(params);
-            case "observe" -> observeGame(params);
-            case "quit" -> "quit";
-            default -> help();
-        };
+        try {
+            var tokens = input.toLowerCase().split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0] : "help"; //default to help command if no input
+            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "login" -> login(params);
+                case "logout" -> logout();
+                case "register" -> register(params);
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "play" -> playGame(params);
+                case "observe" -> observeGame(params);
+                case "quit" -> "quit";
+                default -> help();
+            };
+        } catch (Exception ex) {
+            return ex.getMessage();
+        }
     }
 
     public String help() {
@@ -52,7 +56,7 @@ public class ChessClient {
     public String logout() {
         return "logout not implemented";
     }
-    public String register(String... params) {
+    public String register(String... params) throws Exception {
         if(params.length == 3) {
             loginStatus = LoginStatus.SIGNEDIN;
             UserData newUser = new UserData(params[0], params[1], params[2]);
