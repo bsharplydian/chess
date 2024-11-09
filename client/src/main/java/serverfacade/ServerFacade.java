@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.UserData;
 import request.*;
-import response.RegisterResponse;
+import response.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,27 +19,34 @@ public class ServerFacade {
     }
     public RegisterResponse addUser(RegisterRequest registerRequest) throws Exception {
         var path = "/user";
-        return this.makeRequest("POST", path, registerRequest, RegisterResponse.class);
+        return this.makeRequest("POST", path, registerRequest, RegisterResponse.class, null);
     }
 
-    public AuthData login(LoginRequest loginRequest) throws Exception {
+    public LoginResponse login(LoginRequest loginRequest) throws Exception {
         var path = "/session";
-        return this.makeRequest("POST", path, loginRequest, AuthData.class);
+        return this.makeRequest("POST", path, loginRequest, LoginResponse.class, null);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws Exception {
+    public LogoutResponse logout(LogoutRequest logoutRequest) throws Exception {
+        var path = "/session";
+        return this.makeRequest("DELETE", path, logoutRequest, LogoutResponse.class, logoutRequest.authToken());
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
-
+            if(authToken != null) {
+                http.setRequestProperty("Authorization", authToken);
+            }
             writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
 
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             //do something here probably
             throw new Exception(ex.getMessage());
         }
@@ -72,7 +79,7 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
         var status = http.getResponseCode();
         if (!(status / 100 == 2)) {
-            //let the user know that something broke
+            throw new IOException("request not successful");
         }
     }
 

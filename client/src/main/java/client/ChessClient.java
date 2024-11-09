@@ -10,12 +10,14 @@ import serverfacade.ServerFacade;
 
 import java.util.Arrays;
 
-import static client.LoginStatus.SIGNEDOUT;
+import static client.LoginStatus.*;
 
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private LoginStatus loginStatus = SIGNEDOUT;
+    private String authToken;
+    private String username;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -35,7 +37,7 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "play" -> playGame(params);
                 case "observe" -> observeGame(params);
-                case "quit" -> "quit";
+                case "quit" -> quit();
                 default -> help();
             };
         } catch (Exception ex) {
@@ -43,6 +45,12 @@ public class ChessClient {
         }
     }
 
+    public String quit() throws Exception{
+        if (loginStatus == SIGNEDIN) {
+            logout();
+        }
+        return "quit";
+    }
     public String help() {
         if(loginStatus == SIGNEDOUT) {
             return """  
@@ -51,20 +59,57 @@ public class ChessClient {
                         \tquit - close the program
                         \thelp - display help menu""";
         }
-        return "";
+        return """
+                \tcreate <NAME> - create a new game
+                \tlist - list games
+                \tjoin <ID> [WHITE|BLACK] - join an existing game as a given color
+                \tobserve <ID> - observe an existing game
+                \tlogout - log out
+                \tquit - close the program
+                \thelp - display help menu""";
     }
-    public String login(String... params) {
-        return "login not implemented";
+    public String login(String... params) throws Exception {
+        if(loginStatus == SIGNEDIN){
+            return "already logged in";
+        }
+
+        if(params.length == 2) {
+            LoginRequest loginRequest = new LoginRequest(params[0], params[1]);
+            LoginResponse loginResponse = server.login(loginRequest);
+            if(loginResponse.message() == null){
+                loginStatus = SIGNEDIN;
+                authToken = loginResponse.authToken();
+                return "logged in as " + loginResponse.username() + " " + new Gson().toJson(loginResponse);
+            } else {
+                return loginResponse.message();
+            }
+
+        }
+        return "usage: login <USERNAME> <PASSWORD>";
     }
-    public String logout() {
-        return "logout not implemented";
+    public String logout() throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        }
+        LogoutRequest logoutRequest = new LogoutRequest(authToken);
+        LogoutResponse logoutResponse = server.logout(logoutRequest);
+        if(logoutResponse.message() == null) {
+            loginStatus = SIGNEDOUT;
+            return "successfully logged out";
+        } else {
+            return logoutResponse.message();
+        }
     }
     public String register(String... params) throws Exception {
+        if(loginStatus == SIGNEDIN) {
+            return "already logged in";
+        }
+
         if(params.length == 3) {
             loginStatus = LoginStatus.SIGNEDIN;
-            RegisterRequest newUser = new RegisterRequest(params[0], params[1], params[2]);
-            RegisterResponse responseData = server.addUser(newUser);
-            return "registered as " + newUser.username() + " " + new Gson().toJson(responseData);
+            RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
+            RegisterResponse registerResponse = server.addUser(registerRequest);
+            return "registered as " + registerRequest.username() + " " + new Gson().toJson(registerResponse);
         }
         return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
