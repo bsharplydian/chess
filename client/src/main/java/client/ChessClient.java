@@ -1,13 +1,18 @@
 package client;
 
 import chess.ChessBoard;
+import com.google.gson.Gson;
+import model.UserData;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
 
+import static client.LoginStatus.SIGNEDOUT;
+
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
+    private LoginStatus loginStatus = SIGNEDOUT;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -19,7 +24,6 @@ public class ChessClient {
         var cmd = (tokens.length > 0) ? tokens[0] : "help"; //default to help command if no input
         var params = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch(cmd) {
-            case "display" -> ChessBoardPrinter.displayBoard(new ChessBoard());
             case "login" -> login(params);
             case "logout" -> logout();
             case "register" -> register(params);
@@ -33,7 +37,14 @@ public class ChessClient {
     }
 
     public String help() {
-        return "help not implemented";
+        if(loginStatus == SIGNEDOUT) {
+            return """  
+                        \tregister <USERNAME> <PASSWORD> <EMAIL> - create an account
+                        \tlogin <USERNAME> <PASSWORD> - log in to an account
+                        \tquit - close the program
+                        \thelp - display help menu""";
+        }
+        return "";
     }
     public String login(String... params) {
         return "login not implemented";
@@ -42,7 +53,13 @@ public class ChessClient {
         return "logout not implemented";
     }
     public String register(String... params) {
-        return "register not implemented";
+        if(params.length == 3) {
+            loginStatus = LoginStatus.SIGNEDIN;
+            UserData newUser = new UserData(params[0], params[1], params[2]);
+            UserData responseData = server.addUser(newUser);
+            return "registered as " + newUser.username() + new Gson().toJson(responseData);
+        }
+        return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
     public String createGame(String... params) {
         return "create not implemented";

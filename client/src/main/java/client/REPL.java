@@ -31,9 +31,7 @@ public class REPL {
         }
         System.out.println();
     }
-    public void displayBoard(ChessBoard board) {
-        ChessBoardPrinter.displayBoard(board);
-    }
+
     private void promptUser() {
         System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
     }

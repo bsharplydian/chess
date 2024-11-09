@@ -1,7 +1,6 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import request.CreateRequest;
 import request.JoinRequest;
 import request.ListRequest;

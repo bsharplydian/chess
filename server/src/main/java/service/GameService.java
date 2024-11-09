@@ -13,8 +13,6 @@ import response.ListResponse;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Random;
-import java.util.random.RandomGenerator;
 
 public class GameService {
     private final DataAccess dataAccess;
