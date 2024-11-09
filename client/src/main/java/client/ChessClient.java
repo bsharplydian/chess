@@ -9,6 +9,7 @@ import response.*;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static client.LoginStatus.*;
 
@@ -18,7 +19,7 @@ public class ChessClient {
     private LoginStatus loginStatus = SIGNEDOUT;
     private String authToken;
     private String username;
-
+    private Map<Integer, Integer> gameIDs; // key: server id; value: client id
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
@@ -113,8 +114,16 @@ public class ChessClient {
         }
         return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
-    public String createGame(String... params) {
-        return "create not implemented";
+    public String createGame(String... params) throws Exception{
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        }
+        if(params.length == 1) {
+            CreateRequest createRequest = new CreateRequest(authToken, params[0]);
+            CreateResponse createResponse = server.createGame(createRequest);
+            return "created game " + createRequest.gameName() + " at server id " + createResponse.gameID();
+        }
+        return "usage: create <NAME>";
     }
     public String listGames() {
         return "list not implemented";
