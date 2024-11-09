@@ -5,6 +5,7 @@ import chess.ChessBoard;
 import java.util.Objects;
 import java.util.Scanner;
 import static client.EscapeSequences.*;
+import static client.LoginStatus.*;
 
 
 public class REPL {
@@ -33,6 +34,10 @@ public class REPL {
     }
 
     private void promptUser() {
-        System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
+        if(client.getLoginStatus() == SIGNEDOUT) {
+            System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
+        } else {
+            System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_IN] >>>  " + SET_TEXT_COLOR_GREEN);
+        }
     }
 }

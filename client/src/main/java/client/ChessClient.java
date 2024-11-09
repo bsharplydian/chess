@@ -125,4 +125,8 @@ public class ChessClient {
     public String observeGame(String... params) {
         return "observe not implemented";
     }
+
+    public LoginStatus getLoginStatus() {
+        return loginStatus;
+    }
 }
