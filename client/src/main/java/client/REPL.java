@@ -1,29 +1,34 @@
-package ui;
+package client;
 
 import chess.ChessBoard;
 
 import java.util.Objects;
 import java.util.Scanner;
-import static ui.EscapeSequences.*;
+import static client.EscapeSequences.*;
 
 
 public class REPL {
+    private final ChessClient client;
+
+    public REPL(String serverUrl) {
+        client = new ChessClient(serverUrl);
+    }
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         System.out.print("Welcome to chess! HELP to start");
+
         while(!result.equals("quit")) {
             System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
             String line = scanner.nextLine();
-            if(Objects.equals(line, "display")) {
-                ChessBoard testBoard = new ChessBoard();
-                testBoard.resetBoard();
-                displayBoard(testBoard);
+            try {
+                result = client.eval(line);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
+            } catch (Throwable e) {
+                System.out.print(e.toString());
             }
-            if(Objects.equals(line, "quit")) {
-                result = "quit";
-            }
+
             System.out.print(RESET_TEXT_COLOR);
             System.out.print("congrats, you typed \"" + line + "\"");
         }

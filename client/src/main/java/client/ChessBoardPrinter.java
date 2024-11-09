@@ -1,13 +1,14 @@
-package ui;
+package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-import static ui.EscapeSequences.*;
+import static client.EscapeSequences.*;
 
 public class ChessBoardPrinter {
     // Board dimensions.
@@ -30,8 +31,9 @@ public class ChessBoardPrinter {
     private static final String PawnB = " p ";
 
 
-    public static void displayBoard(ChessBoard board) {
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+    public static String displayBoard(ChessBoard board) {
+        var os = new ByteArrayOutputStream();
+        var out = new PrintStream(os, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
 
@@ -41,6 +43,7 @@ public class ChessBoardPrinter {
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
+        return os.toString();
     }
 
 
