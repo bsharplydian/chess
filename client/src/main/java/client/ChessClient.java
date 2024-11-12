@@ -3,6 +3,7 @@ package client;
 import chess.ChessBoard;
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import request.*;
 import response.*;
@@ -137,6 +138,7 @@ public class ChessClient {
 
     public String listGames(String... params) throws Exception {
         gameIDs.clear();
+        ArrayList<GameData> games = new ArrayList<>();
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
@@ -145,9 +147,16 @@ public class ChessClient {
             ListResponse listResponse = server.listGames(listRequest);
             for(var game : listResponse.games()) {
                 gameIDs.add(game.gameID());
+                games.add(game);
             }
         }
-        return gameIDs.toString();
+
+        StringBuilder listBuilder = new StringBuilder();
+        for(var game : games) {
+            listBuilder.append(String.format("%d. %s\n\tWhite: %s\n\tBlack: %s\n",
+                    game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername()));
+        }
+        return listBuilder.toString();
     }
     public String playGame(String... params) {
         return "play not implemented";
