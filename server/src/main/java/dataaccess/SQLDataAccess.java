@@ -132,7 +132,7 @@ public class SQLDataAccess implements DataAccess {
                 ps.setString(1, String.valueOf(gameID));
                 try (var rs = ps.executeQuery()) {
                     if(rs.next()) {
-                        return readGame(gameID, rs);
+                        return readGame(rs);
                     }
                 }
             }
@@ -142,13 +142,14 @@ public class SQLDataAccess implements DataAccess {
         return null;
     }
 
-    private GameData readGame(int gameID, ResultSet rs) throws SQLException{
-        var whiteUsername = rs.getString(1);
-        var blackUsername = rs.getString(2);
-        var gameName = rs.getString(3);
-        var gameJson = rs.getString(4);
+    private GameData readGame(ResultSet rs) throws SQLException{
+        var gameID = rs.getString(1);
+        var whiteUsername = rs.getString(2);
+        var blackUsername = rs.getString(3);
+        var gameName = rs.getString(4);
+        var gameJson = rs.getString(5);
         ChessGame chessGame = new Gson().fromJson(gameJson, ChessGame.class);
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, chessGame);
+        return new GameData(Integer.parseInt(gameID), whiteUsername, blackUsername, gameName, chessGame);
     }
 
     @Override
@@ -165,12 +166,12 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public ArrayList<GameData> listGames() throws DataAccessException{
         ArrayList<GameData> games = new ArrayList<>();
-        var statement = "SELECT whiteUsername, blackUsername, gameName, gameJson FROM games";
+        var statement = "SELECT id, whiteUsername, blackUsername, gameName, gameJson FROM games";
         try(var conn = DatabaseManager.getConnection()) {
             try(var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        games.addLast(readGame(rs.getRow(), rs));
+                        games.addLast(readGame(rs));
                     }
                 }
             }

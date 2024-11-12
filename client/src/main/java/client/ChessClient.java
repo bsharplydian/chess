@@ -8,6 +8,7 @@ import request.*;
 import response.*;
 import serverfacade.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -19,7 +20,9 @@ public class ChessClient {
     private LoginStatus loginStatus = SIGNEDOUT;
     private String authToken;
     private String username;
-    private Map<Integer, Integer> gameIDs; // key: server id; value: client id
+    private ArrayList<Integer> gameIDs = new ArrayList<>();
+    private Map<Integer, Integer> gameIDServerKey;// key: server id; value: client id
+    private Map<Integer, Integer> gameIDClientKey;
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
@@ -52,6 +55,7 @@ public class ChessClient {
         }
         return "quit";
     }
+
     public String help() {
         if(loginStatus == SIGNEDOUT) {
             return """  
@@ -69,11 +73,11 @@ public class ChessClient {
                 \tquit - close the program
                 \thelp - display help menu""";
     }
+
     public String login(String... params) throws Exception {
         if(loginStatus == SIGNEDIN){
             return "already logged in";
         }
-
         if(params.length == 2) {
             LoginRequest loginRequest = new LoginRequest(params[0], params[1]);
             LoginResponse loginResponse = server.login(loginRequest);
@@ -88,32 +92,37 @@ public class ChessClient {
         }
         return "usage: login <USERNAME> <PASSWORD>";
     }
-    public String logout() throws Exception {
+
+    public String logout(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
-        LogoutRequest logoutRequest = new LogoutRequest(authToken);
-        LogoutResponse logoutResponse = server.logout(logoutRequest);
-        if(logoutResponse.message() == null) {
-            loginStatus = SIGNEDOUT;
-            return "successfully logged out";
-        } else {
-            return logoutResponse.message();
+        if(params.length == 0) {
+            LogoutRequest logoutRequest = new LogoutRequest(authToken);
+            LogoutResponse logoutResponse = server.logout(logoutRequest);
+            if (logoutResponse.message() == null) {
+                loginStatus = SIGNEDOUT;
+                return "successfully logged out";
+            } else {
+                return logoutResponse.message();
+            }
         }
+        return "error: logout does not accept parameters";
     }
+
     public String register(String... params) throws Exception {
         if(loginStatus == SIGNEDIN) {
             return "already logged in";
         }
-
         if(params.length == 3) {
             loginStatus = LoginStatus.SIGNEDIN;
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResponse registerResponse = server.addUser(registerRequest);
             return "registered as " + registerRequest.username() + " " + new Gson().toJson(registerResponse);
         }
-        return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
+        return "error\nusage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
+
     public String createGame(String... params) throws Exception{
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
@@ -123,10 +132,22 @@ public class ChessClient {
             CreateResponse createResponse = server.createGame(createRequest);
             return "created game " + createRequest.gameName() + " at server id " + createResponse.gameID();
         }
-        return "usage: create <NAME>";
+        return "error\nusage: create <NAME>";
     }
-    public String listGames() {
-        return "list not implemented";
+
+    public String listGames(String... params) throws Exception {
+        gameIDs.clear();
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        }
+        if(params.length == 0) {
+            ListRequest listRequest = new ListRequest(authToken);
+            ListResponse listResponse = server.listGames(listRequest);
+            for(var game : listResponse.games()) {
+                gameIDs.add(game.gameID());
+            }
+        }
+        return gameIDs.toString();
     }
     public String playGame(String... params) {
         return "play not implemented";

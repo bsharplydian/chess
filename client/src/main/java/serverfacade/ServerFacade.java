@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
+import java.util.Objects;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -37,6 +38,10 @@ public class ServerFacade {
         return this.makeRequest("POST", path, createRequest, CreateResponse.class, createRequest.authToken());
     }
 
+    public ListResponse listGames(ListRequest listRequest) throws Exception {
+        var path = "/game";
+        return this.makeRequest("GET", path, listRequest, ListResponse.class, listRequest.authToken());
+    }
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
@@ -46,7 +51,9 @@ public class ServerFacade {
             if(authToken != null) {
                 http.setRequestProperty("Authorization", authToken);
             }
-            writeBody(request, http);
+            if(!Objects.equals(method, "GET")) {
+                writeBody(request, http);
+            }
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
