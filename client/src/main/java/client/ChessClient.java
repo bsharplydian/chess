@@ -11,6 +11,7 @@ import serverfacade.ServerFacade;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import static client.LoginStatus.*;
@@ -21,9 +22,8 @@ public class ChessClient {
     private LoginStatus loginStatus = SIGNEDOUT;
     private String authToken;
     private String username;
-    private ArrayList<Integer> gameIDs = new ArrayList<>();
-    private Map<Integer, Integer> gameIDServerKey;// key: server id; value: client id
-    private Map<Integer, Integer> gameIDClientKey;
+    private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
+    private Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
@@ -137,8 +137,8 @@ public class ChessClient {
     }
 
     public String listGames(String... params) throws Exception {
-        gameIDs.clear();
-        ArrayList<GameData> games = new ArrayList<>();
+        StringBuilder listBuilder = new StringBuilder();
+        int gameCounter = 0;
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
@@ -146,16 +146,13 @@ public class ChessClient {
             ListRequest listRequest = new ListRequest(authToken);
             ListResponse listResponse = server.listGames(listRequest);
             for(var game : listResponse.games()) {
-                gameIDs.add(game.gameID());
-                games.add(game);
+                listBuilder.append(String.format("%d. %s\n\tWhite: %s\n\tBlack: %s\n",
+                        ++gameCounter, game.gameName(), game.whiteUsername(), game.blackUsername()));
+                gameIDServerKey.put(game.gameID(), gameCounter);
+                gameIDClientKey.put(gameCounter, game.gameID());
             }
         }
 
-        StringBuilder listBuilder = new StringBuilder();
-        for(var game : games) {
-            listBuilder.append(String.format("%d. %s\n\tWhite: %s\n\tBlack: %s\n",
-                    game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername()));
-        }
         return listBuilder.toString();
     }
     public String playGame(String... params) {
