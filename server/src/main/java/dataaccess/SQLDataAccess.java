@@ -126,7 +126,7 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        var statement = "SELECT whiteUsername, blackUsername, gameName, gameJson FROM games WHERE id=?";
+        var statement = "SELECT id, whiteUsername, blackUsername, gameName, gameJson FROM games WHERE id=?";
         try(var conn = DatabaseManager.getConnection()) {
             try(var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, String.valueOf(gameID));

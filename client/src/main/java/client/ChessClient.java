@@ -1,15 +1,10 @@
 package client;
 
-import chess.ChessBoard;
 import com.google.gson.Gson;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +19,7 @@ public class ChessClient {
     private String username;
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
     private Map<Integer, Integer> gameIDClientKey = new HashMap<>();
+    private Map<Integer, String> gameNameClientKey = new HashMap<>();
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
@@ -40,7 +36,7 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-                case "play" -> playGame(params);
+                case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
                 default -> help();
@@ -150,13 +146,25 @@ public class ChessClient {
                         ++gameCounter, game.gameName(), game.whiteUsername(), game.blackUsername()));
                 gameIDServerKey.put(game.gameID(), gameCounter);
                 gameIDClientKey.put(gameCounter, game.gameID());
+                gameNameClientKey.put(gameCounter, game.gameName());
             }
+            return listBuilder.toString();
         }
 
-        return listBuilder.toString();
+        return "usage: list does not accept parameters";
+
     }
-    public String playGame(String... params) {
-        return "play not implemented";
+    public String joinGame(String... params) throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        }
+        if(params.length == 2) {
+            int clientID = Integer.parseInt(params[0]);
+            JoinRequest joinRequest = new JoinRequest(authToken, params[1], String.valueOf(gameIDClientKey.get(clientID)));
+            JoinResponse joinResponse = server.joinAsColor(joinRequest);
+            return "joined game " + gameNameClientKey.get(clientID);
+        }
+        return "usage: join <ID> [WHITE|BLACK]";
     }
     public String observeGame(String... params) {
         return "observe not implemented";
