@@ -65,7 +65,7 @@ public class GameService {
     }
 
     private Boolean invalidJoinInput(JoinRequest request) {
-        return request.gameID() == null || (!Objects.equals(request.playerColor().toUpperCase(), "WHITE") && !Objects.equals(request.playerColor().toUpperCase(), "BLACK"));
+        return request.gameID() == null || (!Objects.equals(request.playerColor(), "WHITE") && !Objects.equals(request.playerColor(), "BLACK"));
     }
 
     private Boolean colorAlreadyExists(String color, GameData gameData) {
@@ -75,7 +75,7 @@ public class GameService {
 
     private GameData addUserToGame(String color, GameData oldGameData, UserData userData) {
         GameData newGameData;
-        if (Objects.equals(color.toUpperCase(), "WHITE")) {
+        if (Objects.equals(color, "WHITE")) {
             newGameData = new GameData(oldGameData.gameID(), userData.username(),
                     oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
         } else {
