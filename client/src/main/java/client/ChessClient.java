@@ -27,8 +27,8 @@ public class ChessClient {
 
     public String eval(String input) {
         try {
-            var tokens = input.toLowerCase().split(" ");
-            var cmd = (tokens.length > 0) ? tokens[0] : "help"; //default to help command if no input
+            var tokens = input.split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help"; //default to help command if no input
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "login" -> login(params);
@@ -112,12 +112,15 @@ public class ChessClient {
 
     public String register(String... params) throws Exception {
         if(loginStatus == SIGNEDIN) {
-            return "already logged in";
+            return "already logged in: new user not registered";
         }
         if(params.length == 3) {
-            loginStatus = LoginStatus.SIGNEDIN;
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResponse registerResponse = server.addUser(registerRequest);
+            authToken = registerResponse.authToken();
+            if(authToken != null) {
+                loginStatus = SIGNEDIN;
+            }
             return "registered as " + registerRequest.username();
         }
         return "error\nusage: register <USERNAME> <PASSWORD> <EMAIL>";
@@ -144,6 +147,9 @@ public class ChessClient {
         if(params.length == 0) {
             ListRequest listRequest = new ListRequest(authToken);
             ListResponse listResponse = server.listGames(listRequest);
+            if(listResponse.games().isEmpty()) {
+                return "no games to display";
+            }
             for(var game : listResponse.games()) {
                 listBuilder.append(String.format("%d. %s\n\tWhite: %s\n\tBlack: %s\n",
                         ++gameCounter, game.gameName(), game.whiteUsername(), game.blackUsername()));
@@ -172,6 +178,7 @@ public class ChessClient {
                 if(gameNameClientKey.get(clientID) == null) {
                     return "game does not exist";
                 }
+
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
                 ChessBoard board = new ChessBoard();

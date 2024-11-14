@@ -27,7 +27,8 @@ public class ServerFacadeTests {
     }
 
     @AfterAll
-    static void stopServer() {
+    static void stopServer() throws Exception {
+        serverFacade.clear();
         server.stop();
     }
 
@@ -131,6 +132,5 @@ public class ServerFacadeTests {
         Assertions.assertThrows(Exception.class, () ->
                 serverFacade.joinGame(new JoinRequest(registerResponse1.authToken(), "WHITE", "1")));
     }
-
 
 }

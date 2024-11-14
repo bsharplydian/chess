@@ -71,7 +71,7 @@ public class UserHandler {
             loginResponse = new LoginResponse(null, null, e.getMessage());
         }
 
-        if (Objects.equals(loginResponse.message(), "Error: unauthorized")) {
+        if (Objects.equals(loginResponse.message(), "Error: username or password is incorrect")) {
             res.status(401);
         } else if (loginResponse.message() != null) {
             res.status(500);

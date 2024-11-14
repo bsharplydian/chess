@@ -19,7 +19,6 @@ public class REPL {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         System.out.print("Welcome to chess! HELP to start");
-
         while(!result.equals("quit")) {
             promptUser();
             String line = scanner.nextLine();

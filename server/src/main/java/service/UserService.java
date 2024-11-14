@@ -46,7 +46,7 @@ public class UserService {
         LoginResponse response;
         UserData user = dataAccess.getUser(request.username());
         if (user == null || !BCrypt.checkpw(request.password(), user.password())) {
-            response = new LoginResponse(null, null, "Error: unauthorized");
+            response = new LoginResponse(null, null, "Error: username or password is incorrect");
         } else {
             String token = UUID.randomUUID().toString();
             AuthData auth = new AuthData(request.username(), token);
