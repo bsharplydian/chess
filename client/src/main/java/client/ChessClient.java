@@ -160,7 +160,7 @@ public class ChessClient {
         }
         if(params.length == 2) {
             int clientID = Integer.parseInt(params[0]);
-            JoinRequest joinRequest = new JoinRequest(authToken, params[1], String.valueOf(gameIDClientKey.get(clientID)));
+            JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
             JoinResponse joinResponse = server.joinAsColor(joinRequest);
             return "joined game " + gameNameClientKey.get(clientID);
         }

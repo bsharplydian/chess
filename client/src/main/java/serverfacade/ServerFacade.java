@@ -40,12 +40,20 @@ public class ServerFacade {
 
     public ListResponse listGames(ListRequest listRequest) throws Exception {
         var path = "/game";
-        return this.makeRequest("GET", path, listRequest, ListResponse.class, listRequest.authToken());
+        ListResponse response = this.makeRequest("GET", path, listRequest, ListResponse.class, listRequest.authToken());
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     public JoinResponse joinAsColor(JoinRequest joinRequest) throws Exception {
         var path = "/game";
-        return this.makeRequest("PUT", path, joinRequest, JoinResponse.class, joinRequest.authToken());
+        JoinResponse response = this.makeRequest("PUT", path, joinRequest, JoinResponse.class, joinRequest.authToken());
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {
@@ -61,7 +69,7 @@ public class ServerFacade {
                 writeBody(request, http);
             }
             http.connect();
-            throwIfNotSuccessful(http);
+            //throwIfNotSuccessful(http);
             return readBody(http, responseClass);
 
         } catch (IOException ex) {
@@ -89,6 +97,15 @@ public class ServerFacade {
                 if (responseClass != null) {
                     response = new Gson().fromJson(reader, responseClass);
                 }
+            }
+            catch (IOException ex) {
+                try(InputStream respBody = http.getErrorStream()) {
+                    InputStreamReader reader = new InputStreamReader(respBody);
+                    if(responseClass != null) {
+                        response = new Gson().fromJson(reader, responseClass);
+                    }
+                }
+
             }
         }
         return response;
