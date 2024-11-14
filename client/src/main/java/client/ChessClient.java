@@ -1,7 +1,6 @@
 package client;
 
 import chess.ChessBoard;
-import com.google.gson.Gson;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
@@ -170,8 +169,11 @@ public class ChessClient {
             if(isNumber(params[0]) &&
                     (params[1].equalsIgnoreCase("WHITE") || params[1].equalsIgnoreCase("BLACK"))) {
                 int clientID = Integer.parseInt(params[0]);
+                if(gameNameClientKey.get(clientID) == null) {
+                    return "game does not exist";
+                }
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
-                server.joinAsColor(joinRequest);
+                server.joinGame(joinRequest);
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
@@ -201,8 +203,10 @@ public class ChessClient {
                 int clientID = Integer.parseInt(params[0]);
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
-                return server.joinAsObserver() + "observing game " +
-                        gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+                if(gameNameClientKey.get(clientID) == null) {
+                    return "game does not exist";
+                }
+                return "observing game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
             }
         }
         return "usage: observe <ID>";

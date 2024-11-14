@@ -64,17 +64,13 @@ public class ServerFacade {
         return response;
     }
 
-    public JoinResponse joinAsColor(JoinRequest joinRequest) throws Exception {
+    public JoinResponse joinGame(JoinRequest joinRequest) throws Exception {
         var path = "/game";
         JoinResponse response = this.makeRequest("PUT", path, joinRequest, JoinResponse.class, joinRequest.authToken());
         if(response.message() != null) {
             throw new Exception(response.message());
         }
         return response;
-    }
-
-    public String joinAsObserver() throws Exception {
-        return "not implemented";
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {
