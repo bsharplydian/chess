@@ -1,11 +1,8 @@
 package serverfacade;
 
 import com.google.gson.Gson;
-import model.AuthData;
-import model.UserData;
-import request.*;
 import response.*;
-
+import request.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

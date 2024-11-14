@@ -19,7 +19,7 @@ public class ChessClient {
     private String authToken;
     private String username;
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
-    private Map<Integer, Integer> gameIDClientKey = new HashMap<>();
+    private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);

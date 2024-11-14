@@ -1,16 +1,12 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
 import dataaccess.SQLDataAccess;
-import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
-import request.*;
-import response.*;
 
 
 public class ServiceTests {
