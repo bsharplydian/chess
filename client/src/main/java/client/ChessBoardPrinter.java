@@ -17,18 +17,18 @@ public class ChessBoardPrinter {
     // Padded characters.
     private static final String EMPTY = "   ";
     private static final String EMPTYWIDE = " \u2003 ";
-    private static final String KingW = " K ";
-    private static final String QueenW = " Q ";
-    private static final String BishopW = " B ";
-    private static final String KnightW = " N ";
-    private static final String RookW = " R ";
-    private static final String PawnW = " P ";
-    private static final String KingB = " k ";
-    private static final String QueenB = " q ";
-    private static final String BishopB = " b ";
-    private static final String KnightB = " n ";
-    private static final String RookB = " r ";
-    private static final String PawnB = " p ";
+    private static final String KING_W = " K ";
+    private static final String QUEEN_W = " Q ";
+    private static final String BISHOP_W = " B ";
+    private static final String KNIGHT_W = " N ";
+    private static final String ROOK_W = " R ";
+    private static final String PAWN_W = " P ";
+    private static final String KING_B = " k ";
+    private static final String QUEEN_B = " q ";
+    private static final String BISHOP_B = " b ";
+    private static final String KNIGHT_B = " n ";
+    private static final String ROOK_B = " r ";
+    private static final String PAWN_B = " p ";
 
 
     public static String displayBoard(ChessBoard board) {
@@ -52,12 +52,7 @@ public class ChessBoardPrinter {
             out.print(SET_TEXT_COLOR_BLACK);
             out.printf(" %d ", row+1);
             for(int col = 0; col < BOARD_SIZE_IN_SQUARES; ++col) {
-                if((row + col)%2 == 1){
-                    out.print(SET_BG_COLOR_WHITE);
-                } else {
-                    out.print(SET_BG_COLOR_BLUE);
-                }
-                drawSquare(out, board.getSquares()[row][col]);
+                drawSquare(out, row, col, board.getSquares()[row][col]);
             }
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.printf(" %d ", row+1);
@@ -74,12 +69,7 @@ public class ChessBoardPrinter {
             out.print(SET_TEXT_COLOR_BLACK);
             out.printf(" %d ", row+1);
             for(int col = BOARD_SIZE_IN_SQUARES-1; col >= 0; --col) {
-                if((row + col)%2 == 1){
-                    out.print(SET_BG_COLOR_WHITE);
-                } else {
-                    out.print(SET_BG_COLOR_BLUE);
-                }
-                drawSquare(out, board.getSquares()[row][col]);
+                drawSquare(out, row, col, board.getSquares()[row][col]);
             }
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.printf(" %d ", row+1);
@@ -130,53 +120,37 @@ public class ChessBoardPrinter {
             default -> EMPTY;
         };
     }
-    private static void drawSquare(PrintStream out, ChessPiece piece) {
+    private static void drawSquare(PrintStream out, int row, int col, ChessPiece piece) {
         String output;
+        if((row + col)%2 == 1){
+            out.print(SET_BG_COLOR_WHITE);
+        } else {
+            out.print(SET_BG_COLOR_BLUE);
+        }
         if(piece == null) {
             out.print(EMPTY);
         } else {
             if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                 output = switch (piece.getPieceType()) {
-                    case KING -> KingW;
-                    case QUEEN -> QueenW;
-                    case BISHOP -> BishopW;
-                    case KNIGHT -> KnightW;
-                    case ROOK -> RookW;
-                    case PAWN -> PawnW;
+                    case KING -> KING_W;
+                    case QUEEN -> QUEEN_W;
+                    case BISHOP -> BISHOP_W;
+                    case KNIGHT -> KNIGHT_W;
+                    case ROOK -> ROOK_W;
+                    case PAWN -> PAWN_W;
                 };
             } else {
                 output = switch (piece.getPieceType()) {
-                    case KING -> KingB;
-                    case QUEEN -> QueenB;
-                    case BISHOP -> BishopB;
-                    case KNIGHT -> KnightB;
-                    case ROOK -> RookB;
-                    case PAWN -> PawnB;
+                    case KING -> KING_B;
+                    case QUEEN -> QUEEN_B;
+                    case BISHOP -> BISHOP_B;
+                    case KNIGHT -> KNIGHT_B;
+                    case ROOK -> ROOK_B;
+                    case PAWN -> PAWN_B;
                 };
             }
             out.print(output);
         }
-    }
-
-
-    private static void setWhite(PrintStream out) {
-        out.print(SET_BG_COLOR_WHITE);
-        out.print(SET_TEXT_COLOR_WHITE);
-    }
-
-    private static void setRed(PrintStream out) {
-        out.print(SET_BG_COLOR_RED);
-        out.print(SET_TEXT_COLOR_RED);
-    }
-
-    private static void setBlack(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_BLACK);
-    }
-
-    private static void setBlue(PrintStream out) {
-        out.print(SET_BG_COLOR_BLUE);
-        out.print(SET_TEXT_COLOR_BLUE);
     }
 
     private static void setBlank(PrintStream out) {

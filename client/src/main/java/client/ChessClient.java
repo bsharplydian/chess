@@ -82,7 +82,7 @@ public class ChessClient {
             if(loginResponse.message() == null){
                 loginStatus = SIGNEDIN;
                 authToken = loginResponse.authToken();
-                return "logged in as " + loginResponse.username() + " " + new Gson().toJson(loginResponse);
+                return "logged in as " + loginResponse.username();
             } else {
                 return loginResponse.message();
             }
@@ -119,7 +119,7 @@ public class ChessClient {
             loginStatus = LoginStatus.SIGNEDIN;
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResponse registerResponse = server.addUser(registerRequest);
-            return "registered as " + registerRequest.username() + " " + new Gson().toJson(registerResponse);
+            return "registered as " + registerRequest.username();
         }
         return "error\nusage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
@@ -130,8 +130,8 @@ public class ChessClient {
         }
         if(params.length == 1) {
             CreateRequest createRequest = new CreateRequest(authToken, params[0]);
-            CreateResponse createResponse = server.createGame(createRequest);
-            return "created game " + createRequest.gameName() + " at server id " + createResponse.gameID();
+            server.createGame(createRequest);
+            return "created game " + createRequest.gameName();
         }
         return "error\nusage: create <NAME>";
     }
@@ -171,7 +171,7 @@ public class ChessClient {
                     (params[1].equalsIgnoreCase("WHITE") || params[1].equalsIgnoreCase("BLACK"))) {
                 int clientID = Integer.parseInt(params[0]);
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
-                JoinResponse joinResponse = server.joinAsColor(joinRequest);
+                server.joinAsColor(joinRequest);
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
@@ -189,7 +189,7 @@ public class ChessClient {
         }
     }
 
-    public String observeGame(String... params) {
+    public String observeGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
@@ -201,7 +201,8 @@ public class ChessClient {
                 int clientID = Integer.parseInt(params[0]);
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
-                return "observing game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+                return server.joinAsObserver() + "observing game " +
+                        gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
             }
         }
         return "usage: observe <ID>";

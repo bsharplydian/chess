@@ -73,7 +73,7 @@ public class ServerFacade {
         return response;
     }
 
-    public String JoinAsObserver() throws Exception {
+    public String joinAsObserver() throws Exception {
         return "not implemented";
     }
 
@@ -90,7 +90,7 @@ public class ServerFacade {
                 writeBody(request, http);
             }
             http.connect();
-            //throwIfNotSuccessful(http);
+            throwIfNotSuccessful(http);
             return readBody(http, responseClass);
 
         } catch (IOException ex) {
@@ -134,8 +134,8 @@ public class ServerFacade {
 
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
         var status = http.getResponseCode();
-        if (!(status / 100 == 2)) {
-            throw new IOException("request not successful");
+        if (status == 500) {
+            throw new IOException("Internal server error: your request could not be completed.");
         }
     }
 
