@@ -18,24 +18,44 @@ public class ServerFacade {
     public ServerFacade(String url) {
         serverUrl = url;
     }
+    public void clear() throws Exception {
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null, null);
+    }
     public RegisterResponse addUser(RegisterRequest registerRequest) throws Exception {
         var path = "/user";
-        return this.makeRequest("POST", path, registerRequest, RegisterResponse.class, null);
+        RegisterResponse response = this.makeRequest("POST", path, registerRequest, RegisterResponse.class, null);
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     public LoginResponse login(LoginRequest loginRequest) throws Exception {
         var path = "/session";
-        return this.makeRequest("POST", path, loginRequest, LoginResponse.class, null);
+        LoginResponse response = this.makeRequest("POST", path, loginRequest, LoginResponse.class, null);
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     public LogoutResponse logout(LogoutRequest logoutRequest) throws Exception {
         var path = "/session";
-        return this.makeRequest("DELETE", path, logoutRequest, LogoutResponse.class, logoutRequest.authToken());
+        LogoutResponse response = this.makeRequest("DELETE", path, logoutRequest, LogoutResponse.class, logoutRequest.authToken());
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     public CreateResponse createGame(CreateRequest createRequest) throws Exception {
         var path = "/game";
-        return this.makeRequest("POST", path, createRequest, CreateResponse.class, createRequest.authToken());
+        CreateResponse response = this.makeRequest("POST", path, createRequest, CreateResponse.class, createRequest.authToken());
+        if(response.message() != null) {
+            throw new Exception(response.message());
+        }
+        return response;
     }
 
     public ListResponse listGames(ListRequest listRequest) throws Exception {
@@ -54,6 +74,10 @@ public class ServerFacade {
             throw new Exception(response.message());
         }
         return response;
+    }
+
+    public String JoinAsObserver() throws Exception {
+        return "not implemented";
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {

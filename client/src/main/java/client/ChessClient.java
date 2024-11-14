@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import com.google.gson.Gson;
 import request.*;
 import response.*;
@@ -32,10 +33,10 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "login" -> login(params);
-                case "logout" -> logout();
+                case "logout" -> logout(params);
                 case "register" -> register(params);
                 case "create" -> createGame(params);
-                case "list" -> listGames();
+                case "list" -> listGames(params);
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
@@ -99,6 +100,9 @@ public class ChessClient {
             LogoutResponse logoutResponse = server.logout(logoutRequest);
             if (logoutResponse.message() == null) {
                 loginStatus = SIGNEDOUT;
+                gameIDClientKey.clear();
+                gameIDServerKey.clear();
+                gameNameClientKey.clear();
                 return "successfully logged out";
             } else {
                 return logoutResponse.message();
@@ -154,20 +158,53 @@ public class ChessClient {
         return "usage: list does not accept parameters";
 
     }
+
     public String joinGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
+        if(gameIDClientKey.isEmpty()) {
+            return "please list games to confirm ID before joining";
+        }
         if(params.length == 2) {
-            int clientID = Integer.parseInt(params[0]);
-            JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
-            JoinResponse joinResponse = server.joinAsColor(joinRequest);
-            return "joined game " + gameNameClientKey.get(clientID);
+            if(isNumber(params[0]) &&
+                    (params[1].equalsIgnoreCase("WHITE") || params[1].equalsIgnoreCase("BLACK"))) {
+                int clientID = Integer.parseInt(params[0]);
+                JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
+                JoinResponse joinResponse = server.joinAsColor(joinRequest);
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+            }
         }
         return "usage: join <ID> [WHITE|BLACK]";
     }
+
+    private boolean isNumber(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     public String observeGame(String... params) {
-        return "observe not implemented";
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        }
+        if(gameIDClientKey.isEmpty()) {
+            return "please list games to confirm ID before joining";
+        }
+        if(params.length == 1) {
+            if(isNumber(params[0])) {
+                int clientID = Integer.parseInt(params[0]);
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                return "observing game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+            }
+        }
+        return "usage: observe <ID>";
     }
 
     public LoginStatus getLoginStatus() {
