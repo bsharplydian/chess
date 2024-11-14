@@ -40,6 +40,13 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void registerDuplicate() throws Exception {
+        RegisterResponse registerResponse = serverFacade.addUser(new RegisterRequest("a", "secret", "a@a.com"));
+        Assertions.assertThrows(Exception.class,
+                () -> serverFacade.addUser(new RegisterRequest("a", "extrasecret", "a@a.com")));
+    }
+
+    @Test
     public void sampleTest() {
         Assertions.assertTrue(true);
     }
