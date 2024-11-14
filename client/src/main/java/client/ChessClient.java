@@ -107,12 +107,12 @@ public class ChessClient {
                 return logoutResponse.message();
             }
         }
-        return "error: logout does not accept parameters";
+        return "error\nusage: logout does not accept parameters";
     }
 
     public String register(String... params) throws Exception {
         if(loginStatus == SIGNEDIN) {
-            return "already logged in: new user not registered";
+            return "already logged in: new user was not registered";
         }
         if(params.length == 3) {
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
@@ -160,7 +160,7 @@ public class ChessClient {
             return listBuilder.toString();
         }
 
-        return "usage: list does not accept parameters";
+        return "error\nusage: list does not accept parameters";
 
     }
 
