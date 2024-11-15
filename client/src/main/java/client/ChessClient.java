@@ -54,25 +54,32 @@ public class ChessClient {
     }
 
     public String help() {
-        if(loginStatus == SIGNEDOUT) {
-            return """  
+        return switch(loginStatus) {
+            case SIGNEDOUT -> """  
                         \tregister <USERNAME> <PASSWORD> <EMAIL> - create an account
                         \tlogin <USERNAME> <PASSWORD> - log in to an account
                         \tquit - close the program
                         \thelp - display help menu""";
-        }
-        return """
-                \tcreate <NAME> - create a new game
-                \tlist - list games
-                \tjoin <ID> [WHITE|BLACK] - join an existing game as a given color
-                \tobserve <ID> - observe an existing game
-                \tlogout - log out
-                \tquit - close the program
-                \thelp - display help menu""";
+            case SIGNEDIN -> """
+                    \tcreate <NAME> - create a new game
+                    \tlist - list games
+                    \tjoin <ID> [WHITE|BLACK] - join an existing game as a given color
+                    \tobserve <ID> - observe an existing game
+                    \tlogout - log out
+                    \tquit - close the program
+                    \thelp - display help menu""";
+            case PLAYINGGAME -> """
+                    \tshow - display chess board
+                    \tmove <STARTSQUARE> <ENDSQUARE> - make a chess move. squares are formatted "a1"
+                    \tleave - disconnect (another user could take your place)
+                    \tresign - end the game by admitting defeat
+                    \tlight <SQUARE> - display the legal moves for a chess piece
+                    """;
+        };
     }
 
     public String login(String... params) throws Exception {
-        if(loginStatus == SIGNEDIN){
+        if(loginStatus != SIGNEDOUT){
             return "already logged in";
         }
         if(params.length == 2) {
@@ -94,6 +101,9 @@ public class ChessClient {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
+        else if(loginStatus == PLAYINGGAME) {
+            return "cannot log out while a game is in session. please leave this game before logging out";
+        }
         if(params.length == 0) {
             LogoutRequest logoutRequest = new LogoutRequest(authToken);
             LogoutResponse logoutResponse = server.logout(logoutRequest);
@@ -111,7 +121,7 @@ public class ChessClient {
     }
 
     public String register(String... params) throws Exception {
-        if(loginStatus == SIGNEDIN) {
+        if(loginStatus != SIGNEDOUT) {
             return "already logged in: new user was not registered";
         }
         if(params.length == 3) {
@@ -129,6 +139,8 @@ public class ChessClient {
     public String createGame(String... params) throws Exception{
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
+        } else if(loginStatus == PLAYINGGAME){
+            return "cannot create a game while a game is in session";
         }
         if(params.length == 1) {
             CreateRequest createRequest = new CreateRequest(authToken, params[0]);
@@ -139,11 +151,13 @@ public class ChessClient {
     }
 
     public String listGames(String... params) throws Exception {
-        StringBuilder listBuilder = new StringBuilder();
-        int gameCounter = 0;
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
+        } else if(loginStatus == PLAYINGGAME) {
+            return "cannot list games while a game is in session";
         }
+        StringBuilder listBuilder = new StringBuilder();
+        int gameCounter = 0;
         if(params.length == 0) {
             ListRequest listRequest = new ListRequest(authToken);
             ListResponse listResponse = server.listGames(listRequest);
@@ -167,6 +181,8 @@ public class ChessClient {
     public String joinGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
+        } else if(loginStatus == PLAYINGGAME) {
+            return "cannot join a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
             return "please list games to confirm ID before joining";
@@ -201,6 +217,8 @@ public class ChessClient {
     public String observeGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
+        } else if(loginStatus == PLAYINGGAME) {
+            return "cannot observe a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
             return "please list games to confirm ID before joining";
