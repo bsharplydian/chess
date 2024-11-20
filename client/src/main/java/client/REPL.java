@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessBoard;
+import websocket.messages.ServerMessage;
+import websocketHandler.ServerMessageObserver;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -8,11 +10,11 @@ import static client.EscapeSequences.*;
 import static client.LoginStatus.*;
 
 
-public class REPL {
+public class REPL implements ServerMessageObserver {
     private final ChessClient client;
 
     public REPL(String serverUrl) {
-        client = new ChessClient(serverUrl);
+        client = new ChessClient(serverUrl, this);
     }
 
     public void run() {
@@ -30,6 +32,11 @@ public class REPL {
             }
         }
         System.out.println();
+    }
+
+    public void notify(ServerMessage serverMessage) {
+        System.out.println(SET_TEXT_COLOR_RED + serverMessage.getMessage());
+        promptUser();
     }
 
     private void promptUser() {

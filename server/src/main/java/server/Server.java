@@ -7,9 +7,15 @@ import dataaccess.SQLDataAccess;
 import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
+import server.websocketServer.WebSocketHandler;
 import service.UserService;
 import service.GameService;
-import spark.*;
+import spark.Spark;
+import spark.Request;
+import spark.Response;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.*;
+
 
 
 public class Server {
@@ -19,15 +25,17 @@ public class Server {
     private final GameService gameService = new GameService(dataAccess);
     private final GameHandler gameHandler = new GameHandler(gameService);
     private final ClearHandler clearHandler = new ClearHandler(userService);
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
-
+        webSocketHandler = new WebSocketHandler();
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::addUser);
@@ -37,9 +45,9 @@ public class Server {
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+        Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
         //This line initializes the server and can be removed once you have a functioning endpoint 
 //        Spark.init();
-
         Spark.awaitInitialization();
         return Spark.port();
     }
@@ -48,6 +56,12 @@ public class Server {
         Spark.stop();
         Spark.awaitStop();
     }
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws Exception {
+        session.getRemote().sendString("WebSocket response: " + message);
+    }
+
     private DataAccess setDataAccess() {
         try {
             return new SQLDataAccess();

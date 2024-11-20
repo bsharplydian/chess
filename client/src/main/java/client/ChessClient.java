@@ -4,6 +4,8 @@ import chess.ChessBoard;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
+import websocketHandler.ServerMessageObserver;
+import websocketHandler.WebsocketCommunicator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,9 +22,13 @@ public class ChessClient {
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
     private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
-    public ChessClient(String serverUrl) {
+    private final ServerMessageObserver serverMessageObserver;
+    private WebsocketCommunicator ws;
+
+    public ChessClient(String serverUrl, ServerMessageObserver serverMessageObserver) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.serverMessageObserver = serverMessageObserver;
     }
 
     public String eval(String input) {
@@ -102,7 +108,7 @@ public class ChessClient {
             return "not logged in";
         }
         else if(loginStatus == PLAYINGGAME) {
-            return "cannot log out while a game is in session. please leave this game before logging out";
+            return "cannot log out while a game is in session\nplease leave this game before logging out";
         }
         if(params.length == 0) {
             LogoutRequest logoutRequest = new LogoutRequest(authToken);
@@ -197,6 +203,8 @@ public class ChessClient {
 
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
+                ws = new WebsocketCommunicator(serverUrl, serverMessageObserver);
+                ws.connect(authToken, gameIDClientKey.get(clientID));
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
