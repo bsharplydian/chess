@@ -28,7 +28,7 @@ public class Server {
     private final WebSocketHandler webSocketHandler;
 
     public Server() {
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(dataAccess);
     }
 
     public int run(int desiredPort) {

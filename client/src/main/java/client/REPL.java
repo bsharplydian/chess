@@ -35,7 +35,7 @@ public class REPL implements ServerMessageObserver {
     }
 
     public void notify(ServerMessage serverMessage) {
-        System.out.println(SET_TEXT_COLOR_RED + serverMessage.getMessage());
+        System.out.println("\n"+ SET_TEXT_COLOR_MAGENTA + serverMessage.getMessage());
         promptUser();
     }
 

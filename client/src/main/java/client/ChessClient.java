@@ -5,7 +5,7 @@ import request.*;
 import response.*;
 import serverfacade.ServerFacade;
 import websocketHandler.ServerMessageObserver;
-import websocketHandler.WebsocketCommunicator;
+import websocketHandler.WebsocketClientCommunicator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class ChessClient {
     private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
     private final ServerMessageObserver serverMessageObserver;
-    private WebsocketCommunicator ws;
+    private WebsocketClientCommunicator ws;
 
     public ChessClient(String serverUrl, ServerMessageObserver serverMessageObserver) {
         server = new ServerFacade(serverUrl);
@@ -203,7 +203,7 @@ public class ChessClient {
 
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
-                ws = new WebsocketCommunicator(serverUrl, serverMessageObserver);
+                ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
                 ws.connect(authToken, gameIDClientKey.get(clientID));
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
