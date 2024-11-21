@@ -13,6 +13,8 @@ import websocket.messages.ServerMessage;
 import java.io.IOException;
 import java.util.Objects;
 
+import static websocket.messages.ServerMessage.ServerMessageType.LOAD_GAME;
+
 @WebSocket
 public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
@@ -30,13 +32,16 @@ public class WebSocketHandler {
     }
     private void connect(String authToken, int gameID, Session session) throws IOException {
         try {
-            System.out.print("got connect message");
             UserData userData = dataAccess.getUserByAuth(authToken);
             GameData gameData = dataAccess.getGame(gameID);
             String username = userData.username();
             var notification = getPlayerRoleNotification(gameData, username);
+            var gameDataMessage = new ServerMessage(LOAD_GAME);
+            gameDataMessage.setMessage(new Gson().toJson(gameData));
+
             connections.addPlayer(username, session);
-            connections.broadcast(username, notification);
+            connections.loadGameMessage(username, gameDataMessage);
+            connections.broadcastExcludeUser(username, notification);
         } catch (DataAccessException ex) {
             throw new IOException(ex.getMessage());
         }
