@@ -16,10 +16,14 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
+    private final String userColor;
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String userColor) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.userColor = userColor; //If this breaks, it's because the autograder is using a constructor without the userColor parameter.
+                                    //switch this out for a setter and getter if needed
     }
 
     public enum CommandType {
@@ -40,7 +44,9 @@ public class UserGameCommand {
     public Integer getGameID() {
         return gameID;
     }
-
+    public String getUserColor() {
+        return userColor;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {

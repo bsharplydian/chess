@@ -47,9 +47,9 @@ public class WebsocketClientCommunicator extends Endpoint {
     }
 
 
-    public void connect(String authToken, int gameID) throws Exception {
+    public void connect(String authToken, int gameID, String userColor) throws Exception {
         try {
-            var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, userColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
 
         } catch (IOException ex) {

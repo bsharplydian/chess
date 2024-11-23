@@ -27,15 +27,16 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException {
         UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
         switch(userGameCommand.getCommandType()) {
-            case CONNECT -> connect(userGameCommand.getAuthToken(), userGameCommand.getGameID(), session);
+            case CONNECT -> connect(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
         }
     }
-    private void connect(String authToken, int gameID, Session session) throws IOException {
+    private void connect(String authToken, int gameID, String userColor, Session session) throws IOException {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
-            GameData gameData = dataAccess.getGame(gameID);
             String username = userData.username();
-            var notification = getPlayerRoleNotification(gameData, username);
+            var notification = getPlayerRoleNotification(username, userColor);
+
+            GameData gameData = dataAccess.getGame(gameID);
             var gameDataMessage = new ServerMessage(LOAD_GAME);
             gameDataMessage.setMessage(new Gson().toJson(gameData));
 
@@ -47,16 +48,16 @@ public class WebSocketHandler {
         }
     }
 
-    private ServerMessage getPlayerRoleNotification(GameData gameData, String username) {
-        String whiteUsername = gameData.whiteUsername();
-        String blackUsername = gameData.blackUsername();
+    private ServerMessage getPlayerRoleNotification(String username, String userColor) {
         String message;
-        if(Objects.equals(username, whiteUsername)) {
+        if(Objects.equals(userColor, "WHITE")) {
             message = String.format("%s is playing as white", username);
-        } else if(Objects.equals(username, blackUsername)) {
+        } else if(Objects.equals(userColor, "BLACK")) {
             message = String.format("%s is playing as black", username);
-        } else {
+        } else if (Objects.equals(userColor, null)){
             message = String.format("%s is observing the game", username);
+        } else {
+            message = String.format("error: %s did something that shouldn't be possible", username);
         }
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setMessage(message);

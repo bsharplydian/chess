@@ -209,7 +209,7 @@ public class ChessClient {
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
-                ws.connect(authToken, gameIDClientKey.get(clientID));
+                ws.connect(authToken, gameIDClientKey.get(clientID), params[1].toUpperCase());
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
