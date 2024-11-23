@@ -30,6 +30,7 @@ public class WebsocketClientCommunicator extends Endpoint {
                             serverMessageObserver.notify(serverMessage);
                             break;
                         case LOAD_GAME:
+                            serverMessageObserver.loadGame(serverMessage);
                             break;
                         case ERROR:
                             break;

@@ -7,6 +7,7 @@ import chess.ChessPiece;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static client.EscapeSequences.*;
 
@@ -31,21 +32,23 @@ public class ChessBoardPrinter {
     private static final String PAWN_B = " p ";
 
 
-    public static String displayBoard(ChessBoard board) {
+    public static String displayBoard(ChessBoard board, String teamColor) {
         var os = new ByteArrayOutputStream();
         var out = new PrintStream(os, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
+        if(Objects.equals(teamColor, "BLACK")) {
+            drawChessBoardBlack(out, board);
+        } else {
+            drawChessBoardWhite(out, board);
+        }
 
-        drawChessBoard(out, board);
-        out.print("\n");
-        drawChessBoardBlack(out, board);
 
         return os.toString();
     }
 
 
-    private static void drawChessBoard(PrintStream out, ChessBoard board) {
+    private static void drawChessBoardWhite(PrintStream out, ChessBoard board) {
         drawColumnLetters(out);
         for(int row = BOARD_SIZE_IN_SQUARES - 1; row >= 0; --row) {
             out.print(SET_BG_COLOR_LIGHT_GREY);

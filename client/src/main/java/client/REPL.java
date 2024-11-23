@@ -1,11 +1,11 @@
 package client;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import websocket.messages.ServerMessage;
 import websocketHandler.ServerMessageObserver;
 
-import java.util.Objects;
 import java.util.Scanner;
 import static client.EscapeSequences.*;
 import static client.LoginStatus.*;
@@ -42,8 +42,9 @@ public class REPL implements ServerMessageObserver {
 
     @Override
     public void loadGame(ServerMessage game) { // need to add color logic
-        ChessBoard board = new Gson().fromJson(game.getMessage(), ChessBoard.class);
-        String boardOutput = ChessBoardPrinter.displayBoard(board);
+        ChessGame chessGame = new Gson().fromJson(game.getMessage(), ChessGame.class);
+        client.storeChessBoard(chessGame.getBoard());
+        String boardOutput = ChessBoardPrinter.displayBoard(chessGame.getBoard(), client.getTeamColor());
         System.out.println("\n" + boardOutput);
         promptUser();
     }

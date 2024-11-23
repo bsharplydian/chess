@@ -1,7 +1,6 @@
 package client;
 
 import chess.ChessBoard;
-import chess.ChessGame;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
@@ -25,9 +24,10 @@ public class ChessClient {
     //user data variables
     private String authToken;
     private String username;
+    private String teamColor;
 
     //game data variables
-    private ChessGame chessGame;
+    private ChessBoard chessBoard;
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
     private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
@@ -216,14 +216,14 @@ public class ChessClient {
                 if(gameNameClientKey.get(clientID) == null) {
                     return "game may not exist; please list to view available games";
                 }
-
+                this.teamColor = params[1].toUpperCase();
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
+
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
                 ws.connect(authToken, gameIDClientKey.get(clientID), params[1].toUpperCase());
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
-                return "joined game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+
+                return "joined " + gameNameClientKey.get(clientID);
             }
         }
         return "usage: join <ID> [WHITE|BLACK]";
@@ -250,21 +250,36 @@ public class ChessClient {
         if(params.length == 1) {
             if(isNumber(params[0])) {
                 int clientID = Integer.parseInt(params[0]);
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
                 if(gameNameClientKey.get(clientID) == null) {
                     return "game may not exist; please list to view available games";
                 }
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
                 ws.connect(authToken, gameIDClientKey.get(clientID), null);
-                return "observing game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
+
+                return "observing " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(chessBoard, teamColor);
             }
         }
         return "usage: observe <ID>";
     }
 
     public String drawBoard(String... params) throws Exception {
-        return "";
+        if(params.length == 0) {
+            if(loginStatus == SIGNEDOUT) {
+                return "not signed in";
+            } else if (loginStatus == SIGNEDIN) {
+                return "not in a game";
+            } else {
+                return ChessBoardPrinter.displayBoard(chessBoard, teamColor);
+            }
+        }
+        return "usage: show does not accept parameters";
+    }
+
+    public void storeChessBoard(ChessBoard chessBoard) {
+        this.chessBoard = chessBoard;
+    }
+    public String getTeamColor() {
+        return this.teamColor;
     }
     public LoginStatus getLoginStatus() {
         return loginStatus;
