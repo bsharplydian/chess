@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessBoard;
+import com.google.gson.Gson;
 import websocket.messages.ServerMessage;
 import websocketHandler.ServerMessageObserver;
 
@@ -36,6 +37,20 @@ public class REPL implements ServerMessageObserver {
 
     public void notify(ServerMessage serverMessage) {
         System.out.println("\n"+ SET_TEXT_COLOR_MAGENTA + serverMessage.getMessage());
+        promptUser();
+    }
+
+    @Override
+    public void loadGame(ServerMessage game) { // need to add color logic
+        ChessBoard board = new Gson().fromJson(game.getMessage(), ChessBoard.class);
+        String boardOutput = ChessBoardPrinter.displayBoard(board);
+        System.out.println("\n" + boardOutput);
+        promptUser();
+    }
+
+    @Override
+    public void showError(ServerMessage error) {
+        System.out.println("\n" + SET_TEXT_COLOR_RED + error.getMessage());
         promptUser();
     }
 

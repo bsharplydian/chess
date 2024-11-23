@@ -81,6 +81,11 @@ public class ChessClient {
                     \tresign - end the game by admitting defeat
                     \tlight <SQUARE> - display the legal moves for a chess piece
                     """;
+            case OBSERVINGGAME -> """
+                    \tshow - display chess board
+                    \tleave - disconnect
+                    \tlight <SQUARE> - display the legal moves for a chess piece
+                    """;
         };
     }
 
@@ -107,7 +112,7 @@ public class ChessClient {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
         }
-        else if(loginStatus == PLAYINGGAME) {
+        else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
             return "cannot log out while a game is in session\nplease leave this game before logging out";
         }
         if(params.length == 0) {
@@ -145,7 +150,7 @@ public class ChessClient {
     public String createGame(String... params) throws Exception{
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
-        } else if(loginStatus == PLAYINGGAME){
+        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME){
             return "cannot create a game while a game is in session";
         }
         if(params.length == 1) {
@@ -159,7 +164,7 @@ public class ChessClient {
     public String listGames(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
-        } else if(loginStatus == PLAYINGGAME) {
+        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
             return "cannot list games while a game is in session";
         }
         StringBuilder listBuilder = new StringBuilder();
@@ -187,7 +192,7 @@ public class ChessClient {
     public String joinGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
-        } else if(loginStatus == PLAYINGGAME) {
+        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
             return "cannot join a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
@@ -225,7 +230,7 @@ public class ChessClient {
     public String observeGame(String... params) throws Exception {
         if(loginStatus == SIGNEDOUT) {
             return "not logged in";
-        } else if(loginStatus == PLAYINGGAME) {
+        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
             return "cannot observe a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
@@ -245,6 +250,9 @@ public class ChessClient {
         return "usage: observe <ID>";
     }
 
+    public String drawBoard(String... params) throws Exception {
+        return "";
+    }
     public LoginStatus getLoginStatus() {
         return loginStatus;
     }
