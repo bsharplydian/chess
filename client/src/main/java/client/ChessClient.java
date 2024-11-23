@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
@@ -14,16 +15,23 @@ import java.util.Map;
 import static client.LoginStatus.*;
 
 public class ChessClient {
+    //websocket variables
     private final ServerFacade server;
     private final String serverUrl;
     private LoginStatus loginStatus = SIGNEDOUT;
+    private final ServerMessageObserver serverMessageObserver;
+    private WebsocketClientCommunicator ws;
+
+    //user data variables
     private String authToken;
     private String username;
+
+    //game data variables
+    private ChessGame chessGame;
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
     private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
-    private final ServerMessageObserver serverMessageObserver;
-    private WebsocketClientCommunicator ws;
+
 
     public ChessClient(String serverUrl, ServerMessageObserver serverMessageObserver) {
         server = new ServerFacade(serverUrl);
@@ -55,6 +63,9 @@ public class ChessClient {
     public String quit() throws Exception{
         if (loginStatus == SIGNEDIN) {
             logout();
+        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
+            //leave game
+            logout();
         }
         return "quit";
     }
@@ -62,10 +73,10 @@ public class ChessClient {
     public String help() {
         return switch(loginStatus) {
             case SIGNEDOUT -> """  
-                        \tregister <USERNAME> <PASSWORD> <EMAIL> - create an account
-                        \tlogin <USERNAME> <PASSWORD> - log in to an account
-                        \tquit - close the program
-                        \thelp - display help menu""";
+                    \tregister <USERNAME> <PASSWORD> <EMAIL> - create an account
+                    \tlogin <USERNAME> <PASSWORD> - log in to an account
+                    \tquit - close the program
+                    \thelp - display help menu""";
             case SIGNEDIN -> """
                     \tcreate <NAME> - create a new game
                     \tlist - list games
@@ -196,14 +207,14 @@ public class ChessClient {
             return "cannot join a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
-            return "please list games to confirm ID before joining";
+            return "game may not exist; please list to view available games";
         }
         if(params.length == 2) {
             if(isNumber(params[0]) &&
                     (params[1].equalsIgnoreCase("WHITE") || params[1].equalsIgnoreCase("BLACK"))) {
                 int clientID = Integer.parseInt(params[0]);
                 if(gameNameClientKey.get(clientID) == null) {
-                    return "game does not exist";
+                    return "game may not exist; please list to view available games";
                 }
 
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
@@ -234,7 +245,7 @@ public class ChessClient {
             return "cannot observe a game while a game is already in session";
         }
         if(gameIDClientKey.isEmpty()) {
-            return "please list games to confirm ID before joining";
+            return "game may not exist; please list to view available games";
         }
         if(params.length == 1) {
             if(isNumber(params[0])) {
@@ -242,8 +253,10 @@ public class ChessClient {
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 if(gameNameClientKey.get(clientID) == null) {
-                    return "game does not exist";
+                    return "game may not exist; please list to view available games";
                 }
+                ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
+                ws.connect(authToken, gameIDClientKey.get(clientID), null);
                 return "observing game " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(board);
             }
         }
