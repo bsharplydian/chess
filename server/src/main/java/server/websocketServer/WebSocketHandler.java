@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import static websocket.messages.ServerMessage.ServerMessageType.LOAD_GAME;
+import static websocket.messages.ServerMessage.ServerMessageType.NOTIFICATION;
 
 @WebSocket
 public class WebSocketHandler {
@@ -100,12 +101,23 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) {
+    private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) throws IOException {
         // validate move
             //ensure that it's the correct turn (if the turn is null, that means the game has ended)
         // update game
         // load game all others
         // load game user
         // notify all others
+
+        //if checkmate/stalemate, notify everyone and update game accordingly
+        try {
+            UserData userData = dataAccess.getUserByAuth(authToken);
+            String username = userData.username();
+            var notification = new ServerMessage(NOTIFICATION);
+            notification.setMessage(String.format("%s did %s", username, chessMove.toString()));
+            connections.broadcastExcludeUser(username, notification);
+        } catch(DataAccessException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 }

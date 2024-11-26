@@ -1,6 +1,9 @@
 package client;
 
 import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
@@ -10,6 +13,7 @@ import websocketHandler.WebsocketClientCommunicator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static client.LoginStatus.*;
 
@@ -54,6 +58,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "show" -> drawBoard(params);
+                case "move" -> makeMove(params);
                 case "leave" -> leaveGame(params);
                 case "quit" -> quit();
                 default -> help();
@@ -90,7 +95,7 @@ public class ChessClient {
                     \thelp - display help menu""";
             case PLAYINGGAME -> """
                     \tshow - display chess board
-                    \tmove <STARTSQUARE> <ENDSQUARE> - make a chess move. squares are formatted "a1"
+                    \tmove <STARTSQUARE> <ENDSQUARE> [PROMOTION PIECE] - make a chess move. squares are formatted "a1", and promotion piece can be blank
                     \tleave - disconnect (another user could take your place)
                     \tresign - end the game by admitting defeat
                     \tlight <SQUARE> - display the legal moves for a chess piece
@@ -308,20 +313,65 @@ public class ChessClient {
             return "not logged in";
         } else if(loginStatus == SIGNEDIN) {
             return "not in a game";
+        } else if(loginStatus == OBSERVINGGAME) {
+            return "observers cannot make moves";
         }
-        if(params.length == 2) {
+        if(params.length == 2 || params.length == 3) {
+            ChessMove chessMove;
+            if(params.length == 2) {
+                chessMove = createChessMove(params[0], params[1], null);
+            } else {
+                chessMove = createChessMove(params[0], params[1], params[2]);
+            }
+            if(Objects.equals(chessMove, null)) {
+                return "invalid input?";
+            }
             ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
-            ws.leaveGame(authToken, currentGameID, teamColor);
+            ws.makeMove(authToken, currentGameID, teamColor, chessMove);
 
-            this.currentGameID = -1;
-            this.chessBoard = null;
-            this.teamColor = null;
-            loginStatus = SIGNEDIN;
-            return "left game";
+            return "attempted to make a move";
         }
-        return "usage: move <START> <END>";
+        return "usage: move <START> <END> [q|r|b|n|empty]\nSTART and END are formatted \"a1\", promotion piece can be left blank";
     }
+    private ChessMove createChessMove(String start, String end, String promotionString){
+        try {
+            ChessPosition startSquare = getSquare(start);
+            ChessPosition endSquare = getSquare(end);
+            ChessPiece.PieceType promotionPiece = getPieceType(promotionString);
+            return new ChessMove(startSquare, endSquare, promotionPiece);
+        } catch (Exception ex) {
+            return null;
+        }
 
+    }
+    private ChessPiece.PieceType getPieceType(String promotionString) {
+        if(promotionString == null) {
+            return null;
+        }
+        return switch(promotionString.toLowerCase()) {
+            case "q", "queen" -> ChessPiece.PieceType.QUEEN;
+            case "r", "rook" -> ChessPiece.PieceType.ROOK;
+            case "b", "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "n", "knight" -> ChessPiece.PieceType.KNIGHT;
+            default -> throw new IllegalStateException("Unexpected value: " + promotionString.toLowerCase());
+        };
+    }
+    private ChessPosition getSquare(String square) {
+        int row = Integer.parseInt(square.substring(1, 2));
+        String colStr = square.substring(0, 1);
+        int col = switch(colStr.toLowerCase()) {
+            case "a" -> 1;
+            case "b" -> 2;
+            case "c" -> 3;
+            case "d" -> 4;
+            case "e" -> 5;
+            case "f" -> 6;
+            case "g" -> 7;
+            case "h" -> 8;
+            default -> throw new IllegalStateException("Unexpected value: " + colStr);
+        };
+        return new ChessPosition(row, col);
+    }
     public void storeChessBoard(ChessBoard chessBoard) {
         this.chessBoard = chessBoard;
     }
