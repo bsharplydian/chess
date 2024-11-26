@@ -10,13 +10,13 @@ import java.util.Objects;
  */
 public class UserGameCommand {
 
-    private final CommandType commandType;
+    protected final CommandType commandType;
 
-    private final String authToken;
+    protected final String authToken;
 
-    private final Integer gameID;
+    protected final Integer gameID;
 
-    private final String userColor;
+    protected final String userColor;
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String userColor) {
         this.commandType = commandType;
@@ -47,22 +47,21 @@ public class UserGameCommand {
     public String getUserColor() {
         return userColor;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof UserGameCommand)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         UserGameCommand that = (UserGameCommand) o;
-        return getCommandType() == that.getCommandType() &&
-                Objects.equals(getAuthToken(), that.getAuthToken()) &&
-                Objects.equals(getGameID(), that.getGameID());
+        return commandType == that.commandType && Objects.equals(authToken, that.authToken) && Objects.equals(gameID, that.gameID) && Objects.equals(userColor, that.userColor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCommandType(), getAuthToken(), getGameID());
+        return Objects.hash(commandType, authToken, gameID, userColor);
     }
 }

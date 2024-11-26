@@ -1,7 +1,9 @@
 package websocketHandler;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
+import websocket.commands.UserMoveCommand;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -61,6 +63,13 @@ public class WebsocketClientCommunicator extends Endpoint {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+        } catch (IOException ex) {
+            throw new Exception(ex.getMessage());
+        }
+    }
+    public void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) {
+        try {
+            var userGameCommand = new UserMoveCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userColor, chessMove);
         } catch (IOException ex) {
             throw new Exception(ex.getMessage());
         }

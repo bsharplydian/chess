@@ -303,6 +303,25 @@ public class ChessClient {
         return "usage: leave does not accept parameters";
     }
 
+    public String makeMove(String... params) throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        } else if(loginStatus == SIGNEDIN) {
+            return "not in a game";
+        }
+        if(params.length == 2) {
+            ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
+            ws.leaveGame(authToken, currentGameID, teamColor);
+
+            this.currentGameID = -1;
+            this.chessBoard = null;
+            this.teamColor = null;
+            loginStatus = SIGNEDIN;
+            return "left game";
+        }
+        return "usage: move <START> <END>";
+    }
+
     public void storeChessBoard(ChessBoard chessBoard) {
         this.chessBoard = chessBoard;
     }
