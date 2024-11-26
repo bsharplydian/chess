@@ -1,5 +1,6 @@
 package server.websocketServer;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -28,7 +29,11 @@ public class WebSocketHandler {
         UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
         switch(userGameCommand.getCommandType()) {
             case CONNECT -> connectToGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
-            case LEAVE -> leaveGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
+            case LEAVE -> leaveGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor());
+            case MAKE_MOVE -> {
+                UserMoveCommand userMoveCommand = new Gson().fromJson(message, UserMoveCommand.class);
+                makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(), userMoveCommand.getUserColor(), userMoveCommand.getMove());
+            }
         }
     }
     private void connectToGame(String authToken, int gameID, String userColor, Session session) throws IOException {
@@ -65,7 +70,7 @@ public class WebSocketHandler {
         return notification;
     }
 
-    private void leaveGame(String authToken, int gameID, String userColor, Session session) throws IOException {
+    private void leaveGame(String authToken, int gameID, String userColor) throws IOException {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
@@ -95,5 +100,12 @@ public class WebSocketHandler {
         }
     }
 
-
+    private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) {
+        // validate move
+            //ensure that it's the correct turn (if the turn is null, that means the game has ended)
+        // update game
+        // load game all others
+        // load game user
+        // notify all others
+    }
 }

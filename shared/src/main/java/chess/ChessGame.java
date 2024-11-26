@@ -158,10 +158,10 @@ public class ChessGame {
 
         Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
         if (legalMoves == null || legalMoves.isEmpty()) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("not a legal move");
         }
         if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("not a legal move");
         }
         if (legalMoves.contains(move)) {
             board.movePiece(move);
