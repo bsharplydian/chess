@@ -27,14 +27,15 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException {
         UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
         switch(userGameCommand.getCommandType()) {
-            case CONNECT -> connect(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
+            case CONNECT -> connectToGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
+            case LEAVE -> leaveGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
         }
     }
-    private void connect(String authToken, int gameID, String userColor, Session session) throws IOException {
+    private void connectToGame(String authToken, int gameID, String userColor, Session session) throws IOException {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
-            var notification = getPlayerRoleNotification(username, userColor);
+            var notification = getJoinNotification(username, userColor);
 
             GameData gameData = dataAccess.getGame(gameID);
             var gameDataMessage = new ServerMessage(LOAD_GAME);
@@ -48,7 +49,7 @@ public class WebSocketHandler {
         }
     }
 
-    private ServerMessage getPlayerRoleNotification(String username, String userColor) {
+    private ServerMessage getJoinNotification(String username, String userColor) {
         String message;
         if(Objects.equals(userColor, "WHITE")) {
             message = String.format("%s is playing as white", username);
@@ -63,4 +64,36 @@ public class WebSocketHandler {
         notification.setMessage(message);
         return notification;
     }
+
+    private void leaveGame(String authToken, int gameID, String userColor, Session session) throws IOException {
+        try {
+            UserData userData = dataAccess.getUserByAuth(authToken);
+            String username = userData.username();
+            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+            notification.setMessage(String.format("%s left the game", username));
+            GameData oldGameData = dataAccess.getGame(gameID);
+            GameData newGameData = removeColorFromGame(oldGameData, userColor);
+
+
+            if(Objects.equals(userColor, "WHITE") || Objects.equals(userColor, "BLACK")){
+                dataAccess.updateGame(gameID, newGameData);
+            }
+            connections.removePlayer(username);
+            connections.broadcastExcludeUser(username, notification);
+        } catch (DataAccessException ex) {
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    private GameData removeColorFromGame(GameData oldGameData, String userColor) {
+        if(Objects.equals(userColor, "WHITE")) {
+            return new GameData(oldGameData.gameID(), null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+        } else if (Objects.equals(userColor, "BLACK")) {
+            return new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
+        } else {
+            return oldGameData;
+        }
+    }
+
+
 }

@@ -58,8 +58,12 @@ public class REPL implements ServerMessageObserver {
     private void promptUser() {
         if(client.getLoginStatus() == SIGNEDOUT) {
             System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_OUT] >>>  " + SET_TEXT_COLOR_GREEN);
-        } else {
+        } else if(client.getLoginStatus() == SIGNEDIN) {
             System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[LOGGED_IN] >>>  " + SET_TEXT_COLOR_GREEN);
+        } else if(client.getLoginStatus() == PLAYINGGAME) {
+            System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[PLAYING] >>>  " + SET_TEXT_COLOR_GREEN);
+        } else if(client.getLoginStatus() == OBSERVINGGAME) {
+            System.out.print("\n" + RESET_TEXT_COLOR + RESET_BG_COLOR + "[OBSERVING] >>>  " + SET_TEXT_COLOR_GREEN);
         }
     }
 }

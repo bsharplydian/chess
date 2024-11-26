@@ -25,6 +25,7 @@ public class ChessClient {
     private String authToken;
     private String username;
     private String teamColor;
+    private int currentGameID;
 
     //game data variables
     private ChessBoard chessBoard;
@@ -52,6 +53,8 @@ public class ChessClient {
                 case "list" -> listGames(params);
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
+                case "show" -> drawBoard(params);
+                case "leave" -> leaveGame(params);
                 case "quit" -> quit();
                 default -> help();
             };
@@ -61,10 +64,10 @@ public class ChessClient {
     }
 
     public String quit() throws Exception{
+        if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
+            leaveGame();
+        }
         if (loginStatus == SIGNEDIN) {
-            logout();
-        } else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
-            //leave game
             logout();
         }
         return "quit";
@@ -124,7 +127,7 @@ public class ChessClient {
             return "not logged in";
         }
         else if(loginStatus == PLAYINGGAME || loginStatus == OBSERVINGGAME) {
-            return "cannot log out while a game is in session\nplease leave this game before logging out";
+            return "cannot log out while a game is in session";
         }
         if(params.length == 0) {
             LogoutRequest logoutRequest = new LogoutRequest(authToken);
@@ -216,13 +219,16 @@ public class ChessClient {
                 if(gameNameClientKey.get(clientID) == null) {
                     return "game may not exist; please list to view available games";
                 }
-                this.teamColor = params[1].toUpperCase();
+
                 JoinRequest joinRequest = new JoinRequest(authToken, params[1].toUpperCase(), String.valueOf(gameIDClientKey.get(clientID)));
                 server.joinGame(joinRequest);
 
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
-                ws.connect(authToken, gameIDClientKey.get(clientID), params[1].toUpperCase());
+                ws.connectToGame(authToken, gameIDClientKey.get(clientID), params[1].toUpperCase());
 
+                this.teamColor = params[1].toUpperCase();
+                this.currentGameID = gameIDClientKey.get(clientID);
+                loginStatus = PLAYINGGAME;
                 return "joined " + gameNameClientKey.get(clientID);
             }
         }
@@ -254,15 +260,18 @@ public class ChessClient {
                     return "game may not exist; please list to view available games";
                 }
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
-                ws.connect(authToken, gameIDClientKey.get(clientID), null);
+                ws.connectToGame(authToken, gameIDClientKey.get(clientID), null);
 
+                this.currentGameID = gameIDClientKey.get(clientID);
+                this.teamColor = null;
+                this.loginStatus = OBSERVINGGAME;
                 return "observing " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(chessBoard, teamColor);
             }
         }
         return "usage: observe <ID>";
     }
 
-    public String drawBoard(String... params) throws Exception {
+    public String drawBoard(String... params) {
         if(params.length == 0) {
             if(loginStatus == SIGNEDOUT) {
                 return "not signed in";
@@ -273,6 +282,25 @@ public class ChessClient {
             }
         }
         return "usage: show does not accept parameters";
+    }
+
+    public String leaveGame(String... params) throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        } else if(loginStatus == SIGNEDIN) {
+            return "not in a game";
+        }
+        if(params.length == 0) {
+            ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
+            ws.leaveGame(authToken, currentGameID, teamColor);
+
+            this.currentGameID = -1;
+            this.chessBoard = null;
+            this.teamColor = null;
+            loginStatus = SIGNEDIN;
+            return "left game";
+        }
+        return "usage: leave does not accept parameters";
     }
 
     public void storeChessBoard(ChessBoard chessBoard) {

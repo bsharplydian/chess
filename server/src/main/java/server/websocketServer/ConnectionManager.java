@@ -17,8 +17,8 @@ public class ConnectionManager {
         connections.put(username, connection);
     }
 
-    public void leave(String authToken) {
-        connections.remove(authToken);
+    public void removePlayer(String username) {
+        connections.remove(username);
     }
     public void loadGameMessage(String username, ServerMessage gameData) throws IOException {
         var connection = connections.get(username);
