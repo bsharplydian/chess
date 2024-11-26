@@ -67,9 +67,10 @@ public class WebsocketClientCommunicator extends Endpoint {
             throw new Exception(ex.getMessage());
         }
     }
-    public void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) {
+    public void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) throws Exception {
         try {
-            var userGameCommand = new UserMoveCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userColor, chessMove);
+            var userMoveCommand = new UserMoveCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userColor, chessMove);
+            this.session.getBasicRemote().sendText(new Gson().toJson(userMoveCommand));
         } catch (IOException ex) {
             throw new Exception(ex.getMessage());
         }
