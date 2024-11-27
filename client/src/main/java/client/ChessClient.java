@@ -265,10 +265,10 @@ public class ChessClient {
                     return "game may not exist; please list to view available games";
                 }
                 ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
-                ws.connectToGame(authToken, gameIDClientKey.get(clientID), null);
+                ws.connectToGame(authToken, gameIDClientKey.get(clientID), "OBSERVER");
 
                 this.currentGameID = gameIDClientKey.get(clientID);
-                this.teamColor = null;
+                this.teamColor = "OBSERVER";
                 this.loginStatus = OBSERVINGGAME;
                 return "observing " + gameNameClientKey.get(clientID);
             }

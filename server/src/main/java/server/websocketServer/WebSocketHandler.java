@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -39,15 +40,30 @@ public class WebSocketHandler {
             }
         }
     }
+
     private void connectToGame(String authToken, int gameID, String userColor, Session session) throws IOException {
         try {
+
             UserData userData = dataAccess.getUserByAuth(authToken);
+            if(userData == null) {
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: unauthorized");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
+            if(dataAccess.getGame(gameID) == null) {
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: invalid game id");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
             String username = userData.username();
+            userColor = handleUserColor(username, gameID, userColor);
             var notification = getJoinNotification(username, userColor);
 
             GameData gameData = dataAccess.getGame(gameID);
             var gameDataMessage = new ServerMessage(LOAD_GAME);
-            gameDataMessage.setMessage(new Gson().toJson(gameData));
+            gameDataMessage.setGame(new Gson().toJson(gameData));
 
             connections.addPlayer(username, session);
             connections.loadGameMessage(username, gameDataMessage);
@@ -56,7 +72,27 @@ public class WebSocketHandler {
             throw new IOException(ex.getMessage());
         }
     }
-
+    private String handleUserColor(String username, int gameID, String userColor) throws DataAccessException {
+        if(userColor == null) {
+            return getColorFromDB(username, gameID);
+        } else if(userColor.equals("OBSERVER")) {
+            return null;
+        } else {
+            throw new DataAccessException("invalid user color");
+        }
+    }
+    private String getColorFromDB(String username, int gameID) throws DataAccessException {
+        GameData gameData = dataAccess.getGame(gameID);
+        if(gameData.whiteUsername().equals(username) && gameData.blackUsername().equals(username)) {
+            return "BOTH";
+        } else if(gameData.whiteUsername().equals(username)){
+            return "WHITE";
+        } else if(gameData.blackUsername().equals(username)) {
+            return "BLACK";
+        } else {
+            return null;
+        }
+    }
     private ServerMessage getJoinNotification(String username, String userColor) {
         String message;
         if(Objects.equals(userColor, "WHITE")) {
@@ -65,6 +101,8 @@ public class WebSocketHandler {
             message = String.format("%s is playing as black", username);
         } else if (Objects.equals(userColor, null)){
             message = String.format("%s is observing the game", username);
+        } else if (Objects.equals(userColor, "BOTH")) {
+            message = String.format("%s is playing as both colors", username);
         } else {
             message = String.format("error: %s did something that shouldn't be possible", username);
         }
@@ -113,8 +151,18 @@ public class WebSocketHandler {
 
         //if checkmate/stalemate, notify everyone and update game accordingly
         try {
+
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
+            if(userColor == null) { // the client doesn't provide a color, as in the autograder
+                userColor = handleUserColor(username, gameID, userColor);
+            }
+
+            //error handling:
+            //  user data is null
+            //  user color is null
+            //  chess move is null
+            //  game data is null
             ChessGame.TeamColor teamColor = switch(userColor) {
                 case "WHITE" -> ChessGame.TeamColor.WHITE;
                 case "BLACK" -> ChessGame.TeamColor.BLACK;
@@ -134,7 +182,7 @@ public class WebSocketHandler {
                 dataAccess.updateGame(gameID, newGameData);
                 //load game all clients
                 var loadGame = new ServerMessage(LOAD_GAME);
-                loadGame.setMessage(new Gson().toJson(newGameData));
+                loadGame.setGame(new Gson().toJson(newGameData));
                 connections.notifySingle(username, loadGame);
                 connections.broadcastExcludeUser(username, loadGame);
                 //notify all clients
