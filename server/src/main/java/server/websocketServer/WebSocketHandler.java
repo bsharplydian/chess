@@ -1,6 +1,8 @@
 package server.websocketServer;
 
+import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -12,10 +14,10 @@ import websocket.commands.*;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
 
-import static websocket.messages.ServerMessage.ServerMessageType.LOAD_GAME;
-import static websocket.messages.ServerMessage.ServerMessageType.NOTIFICATION;
+import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 @WebSocket
 public class WebSocketHandler {
@@ -66,7 +68,7 @@ public class WebSocketHandler {
         } else {
             message = String.format("error: %s did something that shouldn't be possible", username);
         }
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        var notification = new ServerMessage(NOTIFICATION);
         notification.setMessage(message);
         return notification;
     }
@@ -75,7 +77,7 @@ public class WebSocketHandler {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+            var notification = new ServerMessage(NOTIFICATION);
             notification.setMessage(String.format("%s left the game", username));
             GameData oldGameData = dataAccess.getGame(gameID);
             GameData newGameData = removeColorFromGame(oldGameData, userColor);
@@ -113,11 +115,63 @@ public class WebSocketHandler {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
-            var notification = new ServerMessage(NOTIFICATION);
-            notification.setMessage(String.format("%s did %s", username, chessMove.toString()));
-            connections.broadcastExcludeUser(username, notification);
-        } catch(DataAccessException e) {
+            ChessGame.TeamColor teamColor = switch(userColor) {
+                case "WHITE" -> ChessGame.TeamColor.WHITE;
+                case "BLACK" -> ChessGame.TeamColor.BLACK;
+                default -> throw new IllegalStateException("Unexpected value: " + userColor);
+            };
+            ChessGame.TeamColor oppositeTeamColor = switch(teamColor) {
+                case WHITE -> ChessGame.TeamColor.BLACK;
+                case BLACK -> ChessGame.TeamColor.WHITE;
+            };
+            //validate move
+            GameData oldGameData = dataAccess.getGame(gameID);
+            ChessGame chessGame = oldGameData.game();
+            if(Objects.equals(chessGame.getTeamTurn(), teamColor)) { // it's the player's turn
+                //update game data
+                chessGame.makeMove(chessMove);
+                GameData newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                dataAccess.updateGame(gameID, newGameData);
+                //load game all clients
+                var loadGame = new ServerMessage(LOAD_GAME);
+                loadGame.setMessage(new Gson().toJson(newGameData));
+                connections.notifySingle(username, loadGame);
+                connections.broadcastExcludeUser(username, loadGame);
+                //notify all clients
+                var notification = new ServerMessage(NOTIFICATION);
+                notification.setMessage(String.format("%s: %s", username, chessMove));
+                connections.broadcastExcludeUser(username, notification);
+
+                //test for checkmate
+                if(chessGame.isInCheckmate(oppositeTeamColor)) {
+                    notifyAll(username, String.format("Checkmate! %s wins.", username));
+                    chessGame.setTeamTurn(null);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    dataAccess.updateGame(gameID, concludedGameData);
+                } else if(chessGame.isInCheck(oppositeTeamColor)) {
+                    notifyAll(username, "Check!");
+                    chessGame.setTeamTurn(null);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    dataAccess.updateGame(gameID, concludedGameData);
+                } else if(chessGame.isInStalemate(oppositeTeamColor)) {
+                    notifyAll(username, "Stalemate: there is no winner.");
+                    chessGame.setTeamTurn(null);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    dataAccess.updateGame(gameID, concludedGameData);
+                }
+            } else {
+                var error = new ServerMessage(ERROR);
+                error.setMessage("waiting for opponent to play");
+                connections.notifySingle(username, error);
+            }
+        } catch(DataAccessException | InvalidMoveException e) {
             throw new IOException(e.getMessage());
         }
+    }
+    private void notifyAll(String username, String message) throws IOException {
+        var notification = new ServerMessage(NOTIFICATION);
+        notification.setMessage(message);
+        connections.notifySingle(username, notification);
+        connections.broadcastExcludeUser(username, notification);
     }
 }

@@ -270,7 +270,7 @@ public class ChessClient {
                 this.currentGameID = gameIDClientKey.get(clientID);
                 this.teamColor = null;
                 this.loginStatus = OBSERVINGGAME;
-                return "observing " + gameNameClientKey.get(clientID) + "\n" + ChessBoardPrinter.displayBoard(chessBoard, teamColor);
+                return "observing " + gameNameClientKey.get(clientID);
             }
         }
         return "usage: observe <ID>";
