@@ -5,13 +5,13 @@ import chess.ChessMove;
 import java.util.Objects;
 
 public class UserMoveCommand extends UserGameCommand{
-    private final ChessMove chessMove;
-    public UserMoveCommand(CommandType commandType, String authToken, Integer gameID, String userColor, ChessMove chessMove) {
+    private final ChessMove move;
+    public UserMoveCommand(CommandType commandType, String authToken, Integer gameID, String userColor, ChessMove move) {
         super(commandType, authToken, gameID, userColor);
-        this.chessMove = chessMove;
+        this.move = move;
     }
     public ChessMove getMove() {
-        return chessMove;
+        return move;
     }
 
     @Override
@@ -24,11 +24,11 @@ public class UserMoveCommand extends UserGameCommand{
         }
         UserMoveCommand that = (UserMoveCommand) o;
         return commandType == that.commandType && Objects.equals(authToken, that.authToken) && Objects.equals(gameID, that.gameID)
-                && Objects.equals(userColor, that.userColor) && Objects.equals(chessMove, that.chessMove);
+                && Objects.equals(userColor, that.userColor) && Objects.equals(move, that.move);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(commandType, authToken, gameID, userColor, chessMove);
+        return Objects.hash(commandType, authToken, gameID, userColor, move);
     }
 }
