@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -15,7 +14,6 @@ import websocket.commands.*;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Objects;
 
 import static websocket.messages.ServerMessage.ServerMessageType.*;
@@ -36,7 +34,7 @@ public class WebSocketHandler {
             case LEAVE -> leaveGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor());
             case MAKE_MOVE -> {
                 UserMoveCommand userMoveCommand = new Gson().fromJson(message, UserMoveCommand.class);
-                makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(), userMoveCommand.getUserColor(), userMoveCommand.getMove());
+                makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(), userMoveCommand.getUserColor(), userMoveCommand.getMove(), session);
             }
         }
     }
@@ -58,7 +56,7 @@ public class WebSocketHandler {
                 return;
             }
             String username = userData.username();
-            userColor = handleUserColor(username, gameID, userColor);
+            userColor = colorLookup(username, gameID, userColor);
             var notification = getJoinNotification(username, userColor);
 
             GameData gameData = dataAccess.getGame(gameID);
@@ -72,7 +70,7 @@ public class WebSocketHandler {
             throw new IOException(ex.getMessage());
         }
     }
-    private String handleUserColor(String username, int gameID, String userColor) throws DataAccessException {
+    private String colorLookup(String username, int gameID, String userColor) throws DataAccessException {
         if(userColor == null) {
             return getColorFromDB(username, gameID);
         } else if(userColor.equals("OBSERVER")) {
@@ -115,7 +113,7 @@ public class WebSocketHandler {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
-            userColor = handleUserColor(username, gameID, userColor);
+            userColor = colorLookup(username, gameID, userColor);
             var notification = new ServerMessage(NOTIFICATION);
             notification.setMessage(String.format("%s left the game", username));
             GameData oldGameData = dataAccess.getGame(gameID);
@@ -142,7 +140,7 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove) throws IOException {
+    private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove, Session session) throws IOException {
         // validate move
             //ensure that it's the correct turn (if the turn is null, that means the game has ended)
         // update game
@@ -154,11 +152,22 @@ public class WebSocketHandler {
         try {
 
             UserData userData = dataAccess.getUserByAuth(authToken);
+            if(userData == null) { // auth token didn't match with an existing user
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: unauthorized");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
             String username = userData.username();
             if(userColor == null) { // the client doesn't provide a color, as in the autograder
-                userColor = handleUserColor(username, gameID, userColor);
+                userColor = colorLookup(username, gameID, userColor);
             }
-
+            if(userColor == null) { // after looking up in database, userColor still shows that they are an observer
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: observers cannot make moves");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
             //error handling:
             //  user data is null
             //  user color is null
@@ -178,7 +187,14 @@ public class WebSocketHandler {
             ChessGame chessGame = oldGameData.game();
             if(Objects.equals(chessGame.getTeamTurn(), teamColor)) { // it's the player's turn
                 //update game data
-                chessGame.makeMove(chessMove);
+                try {
+                    chessGame.makeMove(chessMove);
+                } catch(InvalidMoveException e) {
+                    var error = new ServerMessage(ERROR);
+                    error.setError(e.getMessage());
+                    connections.notifySingle(username, error);
+                    return;
+                }
                 GameData newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                 dataAccess.updateGame(gameID, newGameData);
                 //load game all clients
@@ -210,10 +226,10 @@ public class WebSocketHandler {
                 }
             } else {
                 var error = new ServerMessage(ERROR);
-                error.setMessage("waiting for opponent to play");
+                error.setError("error: waiting for opponent to play");
                 connections.notifySingle(username, error);
             }
-        } catch(DataAccessException | InvalidMoveException e) {
+        } catch(DataAccessException e) {
             throw new IOException(e.getMessage());
         }
     }
