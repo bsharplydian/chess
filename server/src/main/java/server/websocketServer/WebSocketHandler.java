@@ -70,44 +70,6 @@ public class WebSocketHandler {
             throw new IOException(ex.getMessage());
         }
     }
-    private String colorLookup(String username, int gameID, String userColor) throws DataAccessException {
-        if(userColor == null) {
-            return getColorFromDB(username, gameID);
-        } else if(userColor.equals("OBSERVER")) {
-            return null;
-        } else {
-            throw new DataAccessException("invalid user color");
-        }
-    }
-    private String getColorFromDB(String username, int gameID) throws DataAccessException {
-        GameData gameData = dataAccess.getGame(gameID);
-        if(Objects.equals(gameData.whiteUsername(), username) && Objects.equals(gameData.blackUsername(), username)) {
-            return "BOTH";
-        } else if(Objects.equals(gameData.whiteUsername(), username)){
-            return "WHITE";
-        } else if(Objects.equals(gameData.blackUsername(), username)) {
-            return "BLACK";
-        } else {
-            return null;
-        }
-    }
-    private ServerMessage getJoinNotification(String username, String userColor) {
-        String message;
-        if(Objects.equals(userColor, "WHITE")) {
-            message = String.format("%s is playing as white", username);
-        } else if(Objects.equals(userColor, "BLACK")) {
-            message = String.format("%s is playing as black", username);
-        } else if (Objects.equals(userColor, null)){
-            message = String.format("%s is observing the game", username);
-        } else if (Objects.equals(userColor, "BOTH")) {
-            message = String.format("%s is playing as both colors", username);
-        } else {
-            message = String.format("error: %s did something that shouldn't be possible", username);
-        }
-        var notification = new ServerMessage(NOTIFICATION);
-        notification.setMessage(message);
-        return notification;
-    }
 
     private void leaveGame(String authToken, int gameID, String userColor) throws IOException {
         try {
@@ -127,16 +89,6 @@ public class WebSocketHandler {
             connections.broadcastExcludeUser(username, notification);
         } catch (DataAccessException ex) {
             throw new IOException(ex.getMessage());
-        }
-    }
-
-    private GameData removeColorFromGame(GameData oldGameData, String userColor) {
-        if(Objects.equals(userColor, "WHITE")) {
-            return new GameData(oldGameData.gameID(), null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
-        } else if (Objects.equals(userColor, "BLACK")) {
-            return new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
-        } else {
-            return oldGameData;
         }
     }
 
@@ -232,6 +184,57 @@ public class WebSocketHandler {
         } catch(DataAccessException e) {
             throw new IOException(e.getMessage());
         }
+    }
+    private void resign() {
+
+    }
+
+    private GameData removeColorFromGame(GameData oldGameData, String userColor) {
+        if(Objects.equals(userColor, "WHITE")) {
+            return new GameData(oldGameData.gameID(), null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+        } else if (Objects.equals(userColor, "BLACK")) {
+            return new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
+        } else {
+            return oldGameData;
+        }
+    }
+    private String colorLookup(String username, int gameID, String userColor) throws DataAccessException {
+        if(userColor == null) {
+            return getColorFromDB(username, gameID);
+        } else if(userColor.equals("OBSERVER")) {
+            return null;
+        } else {
+            throw new DataAccessException("invalid user color");
+        }
+    }
+    private String getColorFromDB(String username, int gameID) throws DataAccessException {
+        GameData gameData = dataAccess.getGame(gameID);
+        if(Objects.equals(gameData.whiteUsername(), username) && Objects.equals(gameData.blackUsername(), username)) {
+            return "BOTH";
+        } else if(Objects.equals(gameData.whiteUsername(), username)){
+            return "WHITE";
+        } else if(Objects.equals(gameData.blackUsername(), username)) {
+            return "BLACK";
+        } else {
+            return null;
+        }
+    }
+    private ServerMessage getJoinNotification(String username, String userColor) {
+        String message;
+        if(Objects.equals(userColor, "WHITE")) {
+            message = String.format("%s is playing as white", username);
+        } else if(Objects.equals(userColor, "BLACK")) {
+            message = String.format("%s is playing as black", username);
+        } else if (Objects.equals(userColor, null)){
+            message = String.format("%s is observing the game", username);
+        } else if (Objects.equals(userColor, "BOTH")) {
+            message = String.format("%s is playing as both colors", username);
+        } else {
+            message = String.format("error: %s did something that shouldn't be possible", username);
+        }
+        var notification = new ServerMessage(NOTIFICATION);
+        notification.setMessage(message);
+        return notification;
     }
     private void notifyAll(String username, String message) throws IOException {
         var notification = new ServerMessage(NOTIFICATION);
