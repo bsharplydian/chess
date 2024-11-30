@@ -38,7 +38,8 @@ public class ChessGame {
      */
     public enum TeamColor {
         WHITE,
-        BLACK
+        BLACK,
+        NONE
     }
 
     /**
@@ -168,6 +169,7 @@ public class ChessGame {
             turn = switch (board.getPiece(move.getEndPosition()).getTeamColor()) {
                 case WHITE -> TeamColor.BLACK;
                 case BLACK -> TeamColor.WHITE;
+                case NONE -> TeamColor.NONE;
             };
         } else {
             throw new InvalidMoveException();
@@ -197,6 +199,7 @@ public class ChessGame {
         int pawnThreatDirection = switch (teamColor) { //pawns will threaten from different sides
             case WHITE -> 1;
             case BLACK -> -1;
+            case NONE -> 1;
         };
 
 

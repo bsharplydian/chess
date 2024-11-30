@@ -36,6 +36,7 @@ public class WebsocketClientCommunicator extends Endpoint {
                             serverMessageObserver.loadGame(serverMessage);
                             break;
                         case ERROR:
+                            serverMessageObserver.showError(serverMessage);
                             break;
                     }
                 }
@@ -72,6 +73,15 @@ public class WebsocketClientCommunicator extends Endpoint {
         try {
             var userMoveCommand = new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, userColor, chessMove);
             this.session.getBasicRemote().sendText(new Gson().toJson(userMoveCommand));
+        } catch (IOException ex) {
+            throw new Exception(ex.getMessage());
+        }
+    }
+    public void resign(String authToken, int gameID, String userColor) throws Exception {
+        try {
+            var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, userColor);
+            this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+
         } catch (IOException ex) {
             throw new Exception(ex.getMessage());
         }

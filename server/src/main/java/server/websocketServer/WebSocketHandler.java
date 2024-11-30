@@ -36,6 +36,7 @@ public class WebSocketHandler {
                 UserMoveCommand userMoveCommand = new Gson().fromJson(message, UserMoveCommand.class);
                 makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(), userMoveCommand.getUserColor(), userMoveCommand.getMove(), session);
             }
+            case RESIGN -> resign(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
         }
     }
 
@@ -133,6 +134,7 @@ public class WebSocketHandler {
             ChessGame.TeamColor oppositeTeamColor = switch(teamColor) {
                 case WHITE -> ChessGame.TeamColor.BLACK;
                 case BLACK -> ChessGame.TeamColor.WHITE;
+                default -> throw new IllegalStateException("Unexpected value: " + teamColor);
             };
             //validate move
             GameData oldGameData = dataAccess.getGame(gameID);
@@ -185,8 +187,41 @@ public class WebSocketHandler {
             throw new IOException(e.getMessage());
         }
     }
-    private void resign() {
 
+    private void resign(String authToken, int gameID, String userColor, Session session) throws IOException {
+        try {
+            UserData userData = dataAccess.getUserByAuth(authToken);
+            String username = userData.username();
+            if(userColor == null) {
+                userColor = colorLookup(username, gameID, userColor);
+            }
+            if(userColor == null) { // after looking up in database, userColor still shows that they are an observer
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: observers cannot make moves");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
+            ChessGame.TeamColor teamColor = switch(userColor) {
+                case "WHITE" -> ChessGame.TeamColor.WHITE;
+                case "BLACK" -> ChessGame.TeamColor.BLACK;
+                default -> throw new IllegalStateException("Unexpected value: " + userColor);
+            };
+
+            GameData oldGameData = dataAccess.getGame(gameID);
+            ChessGame chessGame = oldGameData.game();
+            if(chessGame.getTeamTurn() != ChessGame.TeamColor.NONE) {
+                notifyAll(username, String.format("%s has resigned.", username));
+                chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
+                GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                dataAccess.updateGame(gameID, concludedGameData);
+            } else {
+                ServerMessage error = new ServerMessage(ERROR);
+                error.setError("error: game is already over");
+                session.getRemote().sendString(new Gson().toJson(error));
+            }
+        } catch (DataAccessException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     private GameData removeColorFromGame(GameData oldGameData, String userColor) {

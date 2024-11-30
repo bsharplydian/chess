@@ -333,6 +333,8 @@ public class ChessClient {
         }
         return "usage: move <START> <END> [q|r|b|n|empty]\nSTART and END are formatted \"a1\", promotion piece can be left blank";
     }
+
+
     private ChessMove createChessMove(String start, String end, String promotionString){
         try {
             ChessPosition startSquare = getSquare(start);
@@ -375,6 +377,7 @@ public class ChessClient {
     public void storeChessBoard(ChessBoard chessBoard) {
         this.chessBoard = chessBoard;
     }
+
     public String getTeamColor() {
         return this.teamColor;
     }
