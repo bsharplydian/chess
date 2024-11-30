@@ -83,11 +83,11 @@ public class WebSocketHandler {
     }
     private String getColorFromDB(String username, int gameID) throws DataAccessException {
         GameData gameData = dataAccess.getGame(gameID);
-        if(gameData.whiteUsername().equals(username) && gameData.blackUsername().equals(username)) {
+        if(Objects.equals(gameData.whiteUsername(), username) && Objects.equals(gameData.blackUsername(), username)) {
             return "BOTH";
-        } else if(gameData.whiteUsername().equals(username)){
+        } else if(Objects.equals(gameData.whiteUsername(), username)){
             return "WHITE";
-        } else if(gameData.blackUsername().equals(username)) {
+        } else if(Objects.equals(gameData.blackUsername(), username)) {
             return "BLACK";
         } else {
             return null;
@@ -115,6 +115,7 @@ public class WebSocketHandler {
         try {
             UserData userData = dataAccess.getUserByAuth(authToken);
             String username = userData.username();
+            userColor = handleUserColor(username, gameID, userColor);
             var notification = new ServerMessage(NOTIFICATION);
             notification.setMessage(String.format("%s left the game", username));
             GameData oldGameData = dataAccess.getGame(gameID);
