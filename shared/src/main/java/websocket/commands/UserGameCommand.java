@@ -57,7 +57,8 @@ public class UserGameCommand {
             return false;
         }
         UserGameCommand that = (UserGameCommand) o;
-        return commandType == that.commandType && Objects.equals(authToken, that.authToken) && Objects.equals(gameID, that.gameID) && Objects.equals(userColor, that.userColor);
+        return commandType == that.commandType && Objects.equals(authToken, that.authToken) &&
+                Objects.equals(gameID, that.gameID) && Objects.equals(userColor, that.userColor);
     }
 
     @Override

@@ -7,7 +7,7 @@ import dataaccess.SQLDataAccess;
 import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
-import server.websocketServer.WebSocketHandler;
+import server.websocketserver.WebSocketHandler;
 import service.UserService;
 import service.GameService;
 import spark.Spark;

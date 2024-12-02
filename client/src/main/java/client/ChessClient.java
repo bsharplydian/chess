@@ -7,8 +7,8 @@ import chess.ChessPosition;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
-import websocketHandler.ServerMessageObserver;
-import websocketHandler.WebsocketClientCommunicator;
+import websockethandler.ServerMessageObserver;
+import websockethandler.WebsocketClientCommunicator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,7 +95,7 @@ public class ChessClient {
                     \thelp - display help menu""";
             case PLAYINGGAME -> """
                     \tshow - display chess board
-                    \tmove <STARTSQUARE> <ENDSQUARE> [PROMOTION PIECE] - make a chess move. squares are formatted "a1", and promotion piece can be blank
+                    \tmove <STARTSQUARE> <ENDSQUARE> [PROMOTION PIECE] - make a chess move.
                     \tleave - disconnect (another user could take your place)
                     \tresign - end the game by admitting defeat
                     \tlight <SQUARE> - display the legal moves for a chess piece

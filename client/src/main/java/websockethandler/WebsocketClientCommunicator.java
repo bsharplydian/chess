@@ -1,4 +1,4 @@
-package websocketHandler;
+package websockethandler;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
@@ -10,7 +10,6 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
 
 public class WebsocketClientCommunicator extends Endpoint {
     Session session;

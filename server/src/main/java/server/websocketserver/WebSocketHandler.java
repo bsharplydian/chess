@@ -1,4 +1,4 @@
-package server.websocketServer;
+package server.websocketserver;
 
 import chess.ChessGame;
 import chess.ChessMove;
@@ -34,7 +34,8 @@ public class WebSocketHandler {
             case LEAVE -> leaveGame(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor());
             case MAKE_MOVE -> {
                 UserMoveCommand userMoveCommand = new Gson().fromJson(message, UserMoveCommand.class);
-                makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(), userMoveCommand.getUserColor(), userMoveCommand.getMove(), session);
+                makeMove(userMoveCommand.getAuthToken(), userMoveCommand.getGameID(),
+                        userMoveCommand.getUserColor(), userMoveCommand.getMove(), session);
             }
             case RESIGN -> resign(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
         }
@@ -149,7 +150,8 @@ public class WebSocketHandler {
                     connections.notifySingle(gameID, username, error);
                     return;
                 }
-                GameData newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                GameData newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                        oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                 dataAccess.updateGame(gameID, newGameData);
                 //load game all clients
                 var loadGame = new ServerMessage(LOAD_GAME);
@@ -165,17 +167,20 @@ public class WebSocketHandler {
                 if(chessGame.isInCheckmate(oppositeTeamColor)) {
                     notifyAll(gameID, username, String.format("Checkmate! %s wins.", username));
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
-                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                            oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInCheck(oppositeTeamColor)) {
                     notifyAll(gameID, username, "Check!");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
-                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                            oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInStalemate(oppositeTeamColor)) {
                     notifyAll(gameID, username, "Stalemate: there is no winner.");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
-                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                            oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 }
             } else {
@@ -212,7 +217,8 @@ public class WebSocketHandler {
             if(chessGame.getTeamTurn() != ChessGame.TeamColor.NONE) {
                 notifyAll(gameID, username, String.format("%s has resigned.", username));
                 chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
-                GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
+                GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
+                        oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                 dataAccess.updateGame(gameID, concludedGameData);
             } else {
                 ServerMessage error = new ServerMessage(ERROR);

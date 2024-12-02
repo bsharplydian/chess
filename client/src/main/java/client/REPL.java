@@ -5,7 +5,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 import websocket.messages.ServerMessage;
-import websocketHandler.ServerMessageObserver;
+import websockethandler.ServerMessageObserver;
 
 import java.util.Scanner;
 import static client.EscapeSequences.*;

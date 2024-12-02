@@ -1,4 +1,4 @@
-package websocketHandler;
+package websockethandler;
 import websocket.messages.ServerMessage;
 
 public interface ServerMessageObserver {
