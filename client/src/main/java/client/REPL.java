@@ -43,7 +43,7 @@ public class REPL implements ServerMessageObserver {
 
     @Override
     public void loadGame(ServerMessage game) {
-        GameData gameData = new Gson().fromJson(game.getMessage(), GameData.class);
+        GameData gameData = new Gson().fromJson(game.getGame(), GameData.class);
         ChessGame chessGame = gameData.game();
         ChessBoard chessBoard = chessGame.getBoard();
         client.storeChessBoard(chessGame.getBoard());
@@ -54,7 +54,7 @@ public class REPL implements ServerMessageObserver {
 
     @Override
     public void showError(ServerMessage error) {
-        System.out.println("\n" + SET_TEXT_COLOR_RED + error.getMessage());
+        System.out.println("\n" + SET_TEXT_COLOR_RED + error.getError());
         promptUser();
     }
 

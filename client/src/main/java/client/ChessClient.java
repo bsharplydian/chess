@@ -60,6 +60,7 @@ public class ChessClient {
                 case "show" -> drawBoard(params);
                 case "move" -> makeMove(params);
                 case "leave" -> leaveGame(params);
+                case "resign" -> resign(params);
                 case "quit" -> quit();
                 default -> help();
             };
@@ -334,6 +335,21 @@ public class ChessClient {
         return "usage: move <START> <END> [q|r|b|n|empty]\nSTART and END are formatted \"a1\", promotion piece can be left blank";
     }
 
+    public String resign(String... params) throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        } else if (loginStatus == SIGNEDIN) {
+            return "not in a game";
+        } else if (loginStatus == OBSERVINGGAME) {
+            return "observers cannot resign";
+        }
+        if(params.length == 0) {
+            ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
+            ws.resign(authToken, currentGameID, teamColor);
+            return "resigned";
+        }
+        return "usage: resign does not accept parameters";
+    }
 
     private ChessMove createChessMove(String start, String end, String promotionString){
         try {

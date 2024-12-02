@@ -245,7 +245,7 @@ public class WebSocketHandler {
         } else if(userColor.equals("OBSERVER")) {
             return null;
         } else {
-            throw new DataAccessException("invalid user color");
+            return userColor;
         }
     }
     private String getColorFromDB(String username, int gameID) throws DataAccessException {
