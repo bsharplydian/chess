@@ -20,8 +20,8 @@ import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 @WebSocket
 public class WebSocketHandler {
-    private final GameManager connections = new GameManager();
-    private DataAccess dataAccess;
+    private final ConnectionManager connections = new ConnectionManager();
+    private final DataAccess dataAccess;
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
@@ -64,9 +64,9 @@ public class WebSocketHandler {
             var gameDataMessage = new ServerMessage(LOAD_GAME);
             gameDataMessage.setGame(new Gson().toJson(gameData));
 
-            connections.addPlayer(username, session);
-            connections.loadGameMessage(username, gameDataMessage);
-            connections.broadcastExcludeUser(username, notification);
+            connections.addPlayer(gameID, username, session);
+            connections.loadGameMessage(gameID, username, gameDataMessage);
+            connections.broadcastExcludeUser(gameID, username, notification);
         } catch (DataAccessException ex) {
             throw new IOException(ex.getMessage());
         }
@@ -86,8 +86,8 @@ public class WebSocketHandler {
             if(Objects.equals(userColor, "WHITE") || Objects.equals(userColor, "BLACK")){
                 dataAccess.updateGame(gameID, newGameData);
             }
-            connections.removePlayer(username);
-            connections.broadcastExcludeUser(username, notification);
+            connections.removePlayer(gameID, username);
+            connections.broadcastExcludeUser(gameID, username, notification);
         } catch (DataAccessException ex) {
             throw new IOException(ex.getMessage());
         }
@@ -146,7 +146,7 @@ public class WebSocketHandler {
                 } catch(InvalidMoveException e) {
                     var error = new ServerMessage(ERROR);
                     error.setError(e.getMessage());
-                    connections.notifySingle(username, error);
+                    connections.notifySingle(gameID, username, error);
                     return;
                 }
                 GameData newGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
@@ -154,26 +154,26 @@ public class WebSocketHandler {
                 //load game all clients
                 var loadGame = new ServerMessage(LOAD_GAME);
                 loadGame.setGame(new Gson().toJson(newGameData));
-                connections.notifySingle(username, loadGame);
-                connections.broadcastExcludeUser(username, loadGame);
+                connections.notifySingle(gameID, username, loadGame);
+                connections.broadcastExcludeUser(gameID, username, loadGame);
                 //notify all clients
                 var notification = new ServerMessage(NOTIFICATION);
                 notification.setMessage(String.format("%s: %s", username, chessMove));
-                connections.broadcastExcludeUser(username, notification);
+                connections.broadcastExcludeUser(gameID, username, notification);
 
                 //test for checkmate
                 if(chessGame.isInCheckmate(oppositeTeamColor)) {
-                    notifyAll(username, String.format("Checkmate! %s wins.", username));
+                    notifyAll(gameID, username, String.format("Checkmate! %s wins.", username));
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInCheck(oppositeTeamColor)) {
-                    notifyAll(username, "Check!");
+                    notifyAll(gameID, username, "Check!");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInStalemate(oppositeTeamColor)) {
-                    notifyAll(username, "Stalemate: there is no winner.");
+                    notifyAll(gameID, username, "Stalemate: there is no winner.");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
@@ -181,7 +181,7 @@ public class WebSocketHandler {
             } else {
                 var error = new ServerMessage(ERROR);
                 error.setError("error: waiting for opponent to play");
-                connections.notifySingle(username, error);
+                connections.notifySingle(gameID, username, error);
             }
         } catch(DataAccessException e) {
             throw new IOException(e.getMessage());
@@ -210,7 +210,7 @@ public class WebSocketHandler {
             GameData oldGameData = dataAccess.getGame(gameID);
             ChessGame chessGame = oldGameData.game();
             if(chessGame.getTeamTurn() != ChessGame.TeamColor.NONE) {
-                notifyAll(username, String.format("%s has resigned.", username));
+                notifyAll(gameID, username, String.format("%s has resigned.", username));
                 chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                 GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                 dataAccess.updateGame(gameID, concludedGameData);
@@ -271,10 +271,10 @@ public class WebSocketHandler {
         notification.setMessage(message);
         return notification;
     }
-    private void notifyAll(String username, String message) throws IOException {
+    private void notifyAll(int gameID, String username, String message) throws IOException {
         var notification = new ServerMessage(NOTIFICATION);
         notification.setMessage(message);
-        connections.notifySingle(username, notification);
-        connections.broadcastExcludeUser(username, notification);
+        connections.notifySingle(gameID, username, notification);
+        connections.broadcastExcludeUser(gameID, username, notification);
     }
 }

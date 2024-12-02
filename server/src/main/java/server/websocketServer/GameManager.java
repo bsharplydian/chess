@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameManager {
+    /*
+    contains logic for handling connections in a single game
+     */
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
     public void addPlayer(String username, Session session) {
