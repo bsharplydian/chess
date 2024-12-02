@@ -20,7 +20,7 @@ import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 @WebSocket
 public class WebSocketHandler {
-    private final ConnectionManager connections = new ConnectionManager();
+    private final GameManager connections = new GameManager();
     private DataAccess dataAccess;
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -164,17 +164,17 @@ public class WebSocketHandler {
                 //test for checkmate
                 if(chessGame.isInCheckmate(oppositeTeamColor)) {
                     notifyAll(username, String.format("Checkmate! %s wins.", username));
-                    chessGame.setTeamTurn(null);
+                    chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInCheck(oppositeTeamColor)) {
                     notifyAll(username, "Check!");
-                    chessGame.setTeamTurn(null);
+                    chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInStalemate(oppositeTeamColor)) {
                     notifyAll(username, "Stalemate: there is no winner.");
-                    chessGame.setTeamTurn(null);
+                    chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 }
