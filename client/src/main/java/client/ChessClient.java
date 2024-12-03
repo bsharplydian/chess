@@ -101,12 +101,12 @@ public class ChessClient {
                     \tleave - disconnect (another user could take your place)
                     \tresign - end the game by admitting defeat
                     \tlight <SQUARE> - display the legal moves for a chess piece
-                    """;
+                    \thelp - display help menu""";
             case OBSERVINGGAME -> """
                     \tshow - display chess board
                     \tleave - disconnect
                     \tlight <SQUARE> - display the legal moves for a chess piece
-                    """;
+                    \thelp - display help menu""";
         };
     }
 
@@ -197,8 +197,16 @@ public class ChessClient {
                 return "no games to display";
             }
             for(var game : listResponse.games()) {
+                String whiteUser = game.whiteUsername();
+                String blackUser = game.blackUsername();
+                if(whiteUser == null) {
+                    whiteUser = "none";
+                }
+                if(blackUser == null) {
+                    blackUser = "none";
+                }
                 listBuilder.append(String.format("%d. %s\n\tWhite: %s\n\tBlack: %s\n",
-                        ++gameCounter, game.gameName(), game.whiteUsername(), game.blackUsername()));
+                        ++gameCounter, game.gameName(), whiteUser, blackUser));
                 gameIDServerKey.put(game.gameID(), gameCounter);
                 gameIDClientKey.put(gameCounter, game.gameID());
                 gameNameClientKey.put(gameCounter, game.gameName());

@@ -157,14 +157,20 @@ public class WebSocketHandler {
                 connections.broadcastExcludeUser(gameID, username, notification);
 
                 //test for checkmate
+                String opponentUsername = switch(userColor) {
+                    case "WHITE" -> newGameData.blackUsername();
+                    case "BLACK" -> newGameData.whiteUsername();
+                    default -> null;
+                };
                 if(chessGame.isInCheckmate(oppositeTeamColor)) {
-                    notifyAll(gameID, username, String.format("Checkmate! %s wins.", username));
+                    notifyAll(gameID, username, String.format("%s is in checkmate. %s wins!", opponentUsername, username));
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
                     GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
                             oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInCheck(oppositeTeamColor)) {
-                    notifyAll(gameID, username, "Check!");
+                    notifyAll(gameID, username, String.format("%s(%s) was put in check by %s(%s).", opponentUsername, oppositeTeamColor,
+                            username, teamColor));
                 } else if(chessGame.isInStalemate(oppositeTeamColor)) {
                     notifyAll(gameID, username, "Stalemate: there is no winner.");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
