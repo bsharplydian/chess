@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
 import websocket.messages.ServerMessage;
@@ -46,8 +47,13 @@ public class REPL implements ServerMessageObserver {
         GameData gameData = new Gson().fromJson(game.getGame(), GameData.class);
         ChessGame chessGame = gameData.game();
         ChessBoard chessBoard = chessGame.getBoard();
-        client.storeChessBoard(chessGame.getBoard());
-        String boardOutput = ChessBoardPrinter.displayBoard(chessGame.getBoard(), client.getTeamColor(), null);
+        client.storeChessBoard(chessGame.getBoard(), chessGame.getTeamTurn());
+        String boardOutput = "";
+        try {
+            boardOutput = ChessBoardPrinter.displayBoard(chessGame.getBoard(), client.getTeamColor(), null, chessGame.getTeamTurn());
+        } catch (InvalidMoveException e) {
+            //ignore, this should never be thrown if highlight is null
+        }
         System.out.println("\n" + boardOutput);
         promptUser();
     }

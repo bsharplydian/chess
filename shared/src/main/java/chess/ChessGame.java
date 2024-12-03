@@ -172,7 +172,7 @@ public class ChessGame {
                 case NONE -> TeamColor.NONE;
             };
         } else {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("not a legal move");
         }
         //takes a move, ensures that it is valid, then executes it
 

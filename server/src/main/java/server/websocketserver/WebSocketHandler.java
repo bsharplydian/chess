@@ -165,10 +165,6 @@ public class WebSocketHandler {
                     dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInCheck(oppositeTeamColor)) {
                     notifyAll(gameID, username, "Check!");
-                    chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
-                    GameData concludedGameData = new GameData(oldGameData.gameID(), oldGameData.whiteUsername(),
-                            oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
-                    dataAccess.updateGame(gameID, concludedGameData);
                 } else if(chessGame.isInStalemate(oppositeTeamColor)) {
                     notifyAll(gameID, username, "Stalemate: there is no winner.");
                     chessGame.setTeamTurn(ChessGame.TeamColor.NONE);
@@ -176,7 +172,7 @@ public class WebSocketHandler {
                             oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 }
-            } else if (Objects.equals(chessGame.getTeamTurn(), null)) {
+            } else if (Objects.equals(chessGame.getTeamTurn(), ChessGame.TeamColor.NONE)) {
                 var error = new ServerMessage(ERROR);
                 error.setError("error: the game is over and no more moves can be made");
                 connections.notifySingle(gameID, username, error);

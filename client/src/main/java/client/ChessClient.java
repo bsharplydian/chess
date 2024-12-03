@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import request.*;
 import response.*;
 import serverfacade.ServerFacade;
@@ -32,8 +29,10 @@ public class ChessClient {
     private String teamColor;
     private int currentGameID;
 
+
     //game data variables
     private ChessBoard chessBoard;
+    private ChessGame.TeamColor currentTurn;
     private Map<Integer, Integer> gameIDServerKey = new HashMap<>();// key: server id; value: client id
     private final Map<Integer, Integer> gameIDClientKey = new HashMap<>();
     private Map<Integer, String> gameNameClientKey = new HashMap<>();
@@ -286,7 +285,11 @@ public class ChessClient {
             } else if (loginStatus == SIGNEDIN) {
                 return "not in a game";
             } else {
-                return ChessBoardPrinter.displayBoard(chessBoard, teamColor, null);
+                try {
+                    return ChessBoardPrinter.displayBoard(chessBoard, teamColor, null, currentTurn);
+                } catch (InvalidMoveException e) {
+                    return "this error should never be printed";
+                }
             }
         }
         return SET_TEXT_COLOR_RED + "usage: show does not accept parameters";
@@ -304,6 +307,7 @@ public class ChessClient {
 
             this.currentGameID = -1;
             this.chessBoard = null;
+            this.currentTurn = null;
             this.teamColor = null;
             loginStatus = SIGNEDIN;
             return "left game";
@@ -360,7 +364,11 @@ public class ChessClient {
             return "not in a game";
         }
         if(params.length == 1) {
-            return ChessBoardPrinter.displayBoard(chessBoard, teamColor, getSquare(params[0]));
+            try {
+                return ChessBoardPrinter.displayBoard(chessBoard, teamColor, getSquare(params[0]), currentTurn);
+            } catch (InvalidMoveException e) {
+                return "no piece at selected position";
+            }
         }
         return SET_TEXT_COLOR_RED + "usage: light [SQUARE]\n";
 
@@ -405,8 +413,9 @@ public class ChessClient {
         };
         return new ChessPosition(row, col);
     }
-    public void storeChessBoard(ChessBoard chessBoard) {
+    public void storeChessBoard(ChessBoard chessBoard, ChessGame.TeamColor currentTurn) {
         this.chessBoard = chessBoard;
+        this.currentTurn = currentTurn;
     }
 
     public String getTeamColor() {

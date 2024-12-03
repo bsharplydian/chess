@@ -33,7 +33,7 @@ public class ChessBoardPrinter {
     private static final String PAWN_B = " p ";
 
 
-    public static String displayBoard(ChessBoard board, String teamColor, ChessPosition highlight) {
+    public static String displayBoard(ChessBoard board, String teamColor, ChessPosition highlight, ChessGame.TeamColor currentTurn) throws InvalidMoveException {
         var os = new ByteArrayOutputStream();
         var out = new PrintStream(os, true, StandardCharsets.UTF_8);
 
@@ -45,13 +45,18 @@ public class ChessBoardPrinter {
         } else {
             drawChessBoardWhite(out, board, validSquares);
         }
+        out.print(SET_TEXT_COLOR_MAGENTA);
+        out.printf("Current turn: %s", currentTurn.toString());
 
 
         return os.toString();
     }
-    private static Set<ChessPosition> getValidSquares(ChessBoard board, ChessPosition highlight) {
+    private static Set<ChessPosition> getValidSquares(ChessBoard board, ChessPosition highlight) throws InvalidMoveException {
         ChessGame chessGame = new ChessGame();
         chessGame.setBoard(board);
+        if(highlight != null && board.getPiece(highlight) == null) {
+            throw new InvalidMoveException("no piece at the selected location");
+        }
         Collection<ChessMove> validMoves;
         Set<ChessPosition> validSquares = new HashSet<ChessPosition>();
         if(!Objects.equals(highlight, null)) {
