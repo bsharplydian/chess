@@ -22,14 +22,6 @@ public class GameManager {
     public void removePlayer(String username) {
         connections.remove(username);
     }
-    public void loadGameMessage(String username, ServerMessage gameData) throws IOException {
-        var connection = connections.get(username);
-        if(connection.session.isOpen()) {
-            connection.send(gameData.toString());
-        } else {
-            connections.remove(connection.username);
-        }
-    }
     public void notifySingle(String username, ServerMessage notification) throws IOException {
         var connection = connections.get(username);
         if(connection.session.isOpen()) {

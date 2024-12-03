@@ -72,7 +72,7 @@ public class WebSocketHandler {
             gameDataMessage.setGame(new Gson().toJson(gameData));
 
             connections.addPlayer(gameID, username, session);
-            connections.loadGameMessage(gameID, username, gameDataMessage);
+            connections.notifySingle(gameID, username, gameDataMessage);
             connections.broadcastExcludeUser(gameID, username, notification);
         } catch (DataAccessException ex) {
             throw new IOException(ex.getMessage());
@@ -101,16 +101,8 @@ public class WebSocketHandler {
     }
 
     private void makeMove(String authToken, int gameID, String userColor, ChessMove chessMove, Session session) throws IOException {
-        // validate move
-            //ensure that it's the correct turn (if the turn is null, that means the game has ended)
-        // update game
-        // load game all others
-        // load game user
-        // notify all others
-
         //if checkmate/stalemate, notify everyone and update game accordingly
         try {
-
             UserData userData = dataAccess.getUserByAuth(authToken);
             if(userData == null) { // auth token didn't match with an existing user
                 ServerMessage error = new ServerMessage(ERROR);
@@ -128,11 +120,6 @@ public class WebSocketHandler {
                 session.getRemote().sendString(new Gson().toJson(error));
                 return;
             }
-            //error handling:
-            //  user data is null
-            //  user color is null
-            //  chess move is null
-            //  game data is null
             ChessGame.TeamColor teamColor = switch(userColor) {
                 case "WHITE" -> ChessGame.TeamColor.WHITE;
                 case "BLACK" -> ChessGame.TeamColor.BLACK;

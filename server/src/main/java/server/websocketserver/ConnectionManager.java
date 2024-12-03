@@ -27,10 +27,6 @@ public class ConnectionManager {
         var game = games.get(gameID);
         game.removePlayer(username);
     }
-    public void loadGameMessage(int gameID, String username, ServerMessage gameData) throws IOException {
-        var game = games.get(gameID);
-        game.loadGameMessage(username, gameData);
-    }
     public void notifySingle(int gameID, String username, ServerMessage notification) throws IOException {
         var game = games.get(gameID);
         game.notifySingle(username, notification);
