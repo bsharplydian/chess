@@ -62,6 +62,7 @@ public class ChessBoardPrinter {
         for(var move : validMoves) {
             validSquares.add(move.getEndPosition());
         }
+        validSquares.add(highlight);
         return validSquares;
     }
 
@@ -151,13 +152,13 @@ public class ChessBoardPrinter {
         } else {
             if ((row + col) % 2 == 1) {
                 if(validSquares.contains(new ChessPosition(row+1, col+1))) {
-                    out.print(SET_BG_COLOR_YELLOW);
+                    out.print(SET_BG_COLOR_GREEN);
                 } else {
                     out.print(SET_BG_COLOR_WHITE);
                 }
             } else {
                 if(validSquares.contains(new ChessPosition(row+1, col+1))) {
-                    out.print(SET_BG_COLOR_GREEN);
+                    out.print(SET_BG_COLOR_DARK_GREEN);
                 } else {
                     out.print(SET_BG_COLOR_BLUE);
                 }
