@@ -33,7 +33,8 @@ public class ChessBoardPrinter {
     private static final String PAWN_B = " p ";
 
 
-    public static String displayBoard(ChessBoard board, String teamColor, ChessPosition highlight, ChessGame.TeamColor currentTurn) throws InvalidMoveException {
+    public static String displayBoard(ChessBoard board, String teamColor, ChessPosition highlight,
+                                      ChessGame.TeamColor currentTurn) throws InvalidMoveException {
         var os = new ByteArrayOutputStream();
         var out = new PrintStream(os, true, StandardCharsets.UTF_8);
 
