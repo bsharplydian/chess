@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -39,6 +40,11 @@ public class WebSocketHandler {
             }
             case RESIGN -> resign(userGameCommand.getAuthToken(), userGameCommand.getGameID(), userGameCommand.getUserColor(), session);
         }
+    }
+
+    @OnWebSocketError
+    public void onError(Throwable cause) throws IOException {
+        //ignore
     }
 
     private void connectToGame(String authToken, int gameID, String userColor, Session session) throws IOException {
@@ -183,6 +189,10 @@ public class WebSocketHandler {
                             oldGameData.blackUsername(), oldGameData.gameName(), chessGame);
                     dataAccess.updateGame(gameID, concludedGameData);
                 }
+            } else if (Objects.equals(chessGame.getTeamTurn(), null)) {
+                var error = new ServerMessage(ERROR);
+                error.setError("error: the game is over and no more moves can be made");
+                connections.notifySingle(gameID, username, error);
             } else {
                 var error = new ServerMessage(ERROR);
                 error.setError("error: waiting for opponent to play");

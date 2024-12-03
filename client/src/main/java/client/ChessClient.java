@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static client.EscapeSequences.*;
 import static client.LoginStatus.*;
 
 public class ChessClient {
@@ -58,6 +59,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "show" -> drawBoard(params);
+                case "light" -> highlight(params);
                 case "move" -> makeMove(params);
                 case "leave" -> leaveGame(params);
                 case "resign" -> resign(params);
@@ -125,7 +127,7 @@ public class ChessClient {
             }
 
         }
-        return "usage: login <USERNAME> <PASSWORD>";
+        return SET_TEXT_COLOR_RED + "usage: login <USERNAME> <PASSWORD>";
     }
 
     public String logout(String... params) throws Exception {
@@ -148,7 +150,7 @@ public class ChessClient {
                 return logoutResponse.message();
             }
         }
-        return "error\nusage: logout does not accept parameters";
+        return SET_TEXT_COLOR_RED + "error\nusage: logout does not accept parameters";
     }
 
     public String register(String... params) throws Exception {
@@ -164,7 +166,7 @@ public class ChessClient {
             }
             return "registered as " + registerRequest.username();
         }
-        return "error\nusage: register <USERNAME> <PASSWORD> <EMAIL>";
+        return SET_TEXT_COLOR_RED + "error\nusage: register <USERNAME> <PASSWORD> <EMAIL>";
     }
 
     public String createGame(String... params) throws Exception{
@@ -178,7 +180,7 @@ public class ChessClient {
             server.createGame(createRequest);
             return "created game " + createRequest.gameName();
         }
-        return "error\nusage: create <NAME>";
+        return SET_TEXT_COLOR_RED + "error\nusage: create <NAME>";
     }
 
     public String listGames(String... params) throws Exception {
@@ -205,7 +207,7 @@ public class ChessClient {
             return listBuilder.toString();
         }
 
-        return "error\nusage: list does not accept parameters";
+        return SET_TEXT_COLOR_RED + "error\nusage: list does not accept parameters";
 
     }
 
@@ -238,7 +240,7 @@ public class ChessClient {
                 return "joined " + gameNameClientKey.get(clientID);
             }
         }
-        return "usage: join <ID> [WHITE|BLACK]";
+        return SET_TEXT_COLOR_RED + "usage: join <ID> [WHITE|BLACK]";
     }
 
     private boolean isNumber(String str) {
@@ -274,7 +276,7 @@ public class ChessClient {
                 return "observing " + gameNameClientKey.get(clientID);
             }
         }
-        return "usage: observe <ID>";
+        return SET_TEXT_COLOR_RED + "usage: observe <ID>";
     }
 
     public String drawBoard(String... params) {
@@ -284,10 +286,10 @@ public class ChessClient {
             } else if (loginStatus == SIGNEDIN) {
                 return "not in a game";
             } else {
-                return ChessBoardPrinter.displayBoard(chessBoard, teamColor);
+                return ChessBoardPrinter.displayBoard(chessBoard, teamColor, null);
             }
         }
-        return "usage: show does not accept parameters";
+        return SET_TEXT_COLOR_RED + "usage: show does not accept parameters";
     }
 
     public String leaveGame(String... params) throws Exception {
@@ -306,7 +308,7 @@ public class ChessClient {
             loginStatus = SIGNEDIN;
             return "left game";
         }
-        return "usage: leave does not accept parameters";
+        return SET_TEXT_COLOR_RED + "usage: leave does not accept parameters";
     }
 
     public String makeMove(String... params) throws Exception {
@@ -330,7 +332,7 @@ public class ChessClient {
             ws = new WebsocketClientCommunicator(serverUrl, serverMessageObserver);
             ws.makeMove(authToken, currentGameID, teamColor, chessMove);
 
-            return "attempted to make a move";
+            return "";
         }
         return "usage: move <START> <END> [q|r|b|n|empty]\nSTART and END are formatted \"a1\", promotion piece can be left blank";
     }
@@ -348,7 +350,20 @@ public class ChessClient {
             ws.resign(authToken, currentGameID, teamColor);
             return "resigned";
         }
-        return "usage: resign does not accept parameters";
+        return SET_TEXT_COLOR_RED + "usage: resign does not accept parameters\n";
+    }
+
+    public String highlight(String... params) throws Exception {
+        if(loginStatus == SIGNEDOUT) {
+            return "not logged in";
+        } else if (loginStatus == SIGNEDIN) {
+            return "not in a game";
+        }
+        if(params.length == 1) {
+            return ChessBoardPrinter.displayBoard(chessBoard, teamColor, getSquare(params[0]));
+        }
+        return SET_TEXT_COLOR_RED + "usage: light [SQUARE]\n";
+
     }
 
     private ChessMove createChessMove(String start, String end, String promotionString){

@@ -1,13 +1,14 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static client.EscapeSequences.*;
 
@@ -32,30 +33,46 @@ public class ChessBoardPrinter {
     private static final String PAWN_B = " p ";
 
 
-    public static String displayBoard(ChessBoard board, String teamColor) {
+    public static String displayBoard(ChessBoard board, String teamColor, ChessPosition highlight) {
         var os = new ByteArrayOutputStream();
         var out = new PrintStream(os, true, StandardCharsets.UTF_8);
 
+        Set<ChessPosition> validSquares = getValidSquares(board, highlight);
+
         out.print(ERASE_SCREEN);
         if(Objects.equals(teamColor, "BLACK")) {
-            drawChessBoardBlack(out, board);
+            drawChessBoardBlack(out, board, validSquares);
         } else {
-            drawChessBoardWhite(out, board);
+            drawChessBoardWhite(out, board, validSquares);
         }
 
 
         return os.toString();
     }
+    private static Set<ChessPosition> getValidSquares(ChessBoard board, ChessPosition highlight) {
+        ChessGame chessGame = new ChessGame();
+        chessGame.setBoard(board);
+        Collection<ChessMove> validMoves;
+        Set<ChessPosition> validSquares = new HashSet<ChessPosition>();
+        if(!Objects.equals(highlight, null)) {
+            validMoves = chessGame.validMoves(highlight);
+        } else {
+            return null;
+        }
+        for(var move : validMoves) {
+            validSquares.add(move.getEndPosition());
+        }
+        return validSquares;
+    }
 
-
-    private static void drawChessBoardWhite(PrintStream out, ChessBoard board) {
+    private static void drawChessBoardWhite(PrintStream out, ChessBoard board, Set<ChessPosition> highlightSquares) {
         drawColumnLetters(out);
         for(int row = BOARD_SIZE_IN_SQUARES - 1; row >= 0; --row) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(SET_TEXT_COLOR_BLACK);
             out.printf(" %d ", row+1);
             for(int col = 0; col < BOARD_SIZE_IN_SQUARES; ++col) {
-                drawSquare(out, row, col, board.getSquares()[row][col]);
+                drawSquare(out, row, col, board.getSquares()[row][col], highlightSquares);
             }
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.printf(" %d ", row+1);
@@ -65,14 +82,14 @@ public class ChessBoardPrinter {
         }
         drawColumnLetters(out);
     }
-    private static void drawChessBoardBlack(PrintStream out, ChessBoard board) {
+    private static void drawChessBoardBlack(PrintStream out, ChessBoard board, Set<ChessPosition> highlightSquares) {
         drawColumnLettersBlack(out);
         for(int row = 0; row < BOARD_SIZE_IN_SQUARES; ++row) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(SET_TEXT_COLOR_BLACK);
             out.printf(" %d ", row+1);
             for(int col = BOARD_SIZE_IN_SQUARES-1; col >= 0; --col) {
-                drawSquare(out, row, col, board.getSquares()[row][col]);
+                drawSquare(out, row, col, board.getSquares()[row][col], highlightSquares);
             }
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.printf(" %d ", row+1);
@@ -123,12 +140,28 @@ public class ChessBoardPrinter {
             default -> EMPTY;
         };
     }
-    private static void drawSquare(PrintStream out, int row, int col, ChessPiece piece) {
+    private static void drawSquare(PrintStream out, int row, int col, ChessPiece piece, Set<ChessPosition> validSquares) {
         String output;
-        if((row + col)%2 == 1){
-            out.print(SET_BG_COLOR_WHITE);
+        if(validSquares == null) {
+            if ((row + col) % 2 == 1) {
+                out.print(SET_BG_COLOR_WHITE);
+            } else {
+                out.print(SET_BG_COLOR_BLUE);
+            }
         } else {
-            out.print(SET_BG_COLOR_BLUE);
+            if ((row + col) % 2 == 1) {
+                if(validSquares.contains(new ChessPosition(row+1, col+1))) {
+                    out.print(SET_BG_COLOR_YELLOW);
+                } else {
+                    out.print(SET_BG_COLOR_WHITE);
+                }
+            } else {
+                if(validSquares.contains(new ChessPosition(row+1, col+1))) {
+                    out.print(SET_BG_COLOR_GREEN);
+                } else {
+                    out.print(SET_BG_COLOR_BLUE);
+                }
+            }
         }
         if(piece == null) {
             out.print(EMPTY);

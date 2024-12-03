@@ -47,7 +47,7 @@ public class REPL implements ServerMessageObserver {
         ChessGame chessGame = gameData.game();
         ChessBoard chessBoard = chessGame.getBoard();
         client.storeChessBoard(chessGame.getBoard());
-        String boardOutput = ChessBoardPrinter.displayBoard(chessGame.getBoard(), client.getTeamColor());
+        String boardOutput = ChessBoardPrinter.displayBoard(chessGame.getBoard(), client.getTeamColor(), null);
         System.out.println("\n" + boardOutput);
         promptUser();
     }
