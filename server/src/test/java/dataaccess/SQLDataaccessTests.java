@@ -137,7 +137,6 @@ public class SQLDataaccessTests {
         Assertions.assertEquals("james", dataAccess.getGame(id).whiteUsername());
     }
 
-    @Disabled
     @Test
     public void updateGameFailure() throws DataAccessException {
         Assertions.assertThrows(DataAccessException.class, () -> {
